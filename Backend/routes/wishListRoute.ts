@@ -5,7 +5,7 @@ import { addToWishList, getWishListByUserId, removeFromWishList } from "../contr
 
 const router = Router();
 
-router.post("/addToWishlist", authenticateUser, addToWishList);
+router.post("/add-to-wishlist", authenticateUser, addToWishList);
 router.get("/:userId", authenticateUser, getWishListByUserId);
 router.delete("/remove/:productId", authenticateUser, removeFromWishList);
 

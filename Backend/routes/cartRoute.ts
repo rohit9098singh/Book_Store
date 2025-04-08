@@ -8,7 +8,7 @@ import { authenticateUser } from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.post("/addToCart", authenticateUser, addToCart);
+router.post("/add-to-cart", authenticateUser, addToCart);
 router.get("/:userId", authenticateUser, getCartByUserId);
 router.delete("/remove/:productId", authenticateUser, removeFromCart);
 

@@ -9,6 +9,7 @@ import cartRoute from "./routes/cartRoute"
 import wishlistRoute from "./routes/wishListRoute"
 import addressRoute from "./routes/addressRoute"
 import userRoute from "./routes/userRoute"
+import orderRoute from "./routes/orderRoute"
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use("/api/cart",cartRoute);
 app.use("/api/wishlist",wishlistRoute);
 app.use("/api/user/address",addressRoute);
 app.use("/api/user",userRoute);
+app.use("/api/order",orderRoute);
 
 const startServer = async () => {
     try {

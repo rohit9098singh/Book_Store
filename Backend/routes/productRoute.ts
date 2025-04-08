@@ -5,11 +5,11 @@ import { createProduct, deleteProduct, getAllProducts, getProductById, getProduc
 
 const router=Router();
 
-router.post("/createProduct",authenticateUser,multerMiddleware,createProduct)
-router.get("/getAllProduct",authenticateUser,getAllProducts)
-router.get("/getProductById/:id",authenticateUser,getProductById)
-router.delete("/deleteProduct/:productId",authenticateUser,deleteProduct)
-router.get("/getProductBySellerId/:sellerId",authenticateUser,getProductBySellerId)
+router.post("/create-product",authenticateUser,multerMiddleware,createProduct)
+router.get("/get-all-product",authenticateUser,getAllProducts)
+router.get("/get-product-by-Id/:id",authenticateUser,getProductById)
+router.delete("/delete-product/:productId",authenticateUser,deleteProduct)
+router.get("/get-product-by-sellerId/:sellerId",authenticateUser,getProductBySellerId)
 
 
 export default router;

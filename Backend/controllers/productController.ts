@@ -119,7 +119,7 @@ export const deleteProduct=async (req: Request, res: Response) => {
       return response(res, 404, "Product Not Found For This Id");
     }
   
-  return response(res, 200, "Product Fetched Successfully", product);
+  return response(res, 200, "Product deleted Successfully", product);
   } catch (error: any) {
     return response(res, 500, "Internal server error", error.message);
   }

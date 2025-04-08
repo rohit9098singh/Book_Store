@@ -8,8 +8,8 @@ import {
 
 const router = Router();
 
-router.post("/createOrUpdateAddressByUserId", authenticateUser, createOrUpdateAddressByUserId);
+router.post("/create-or-update-address-by-userId", authenticateUser, createOrUpdateAddressByUserId);
 
-router.get("/getAddressByUserId", authenticateUser, getAddressByUserId);
+router.get("/get-address-by-userId", authenticateUser, getAddressByUserId);
 
 export default router;

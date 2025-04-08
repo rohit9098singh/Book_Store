@@ -7,13 +7,13 @@ export const createOrUpdateAddressByUserId = async (req: Request, res: Response)
   try {
     const userId = req.id;
     const {
+      addressId,
       addressLine1,
       addressLine2,
       phoneNumber,
       city,
       state,
       pincode,
-      addressId,
     } = req.body;
 
     if (!userId) {
@@ -32,13 +32,14 @@ export const createOrUpdateAddressByUserId = async (req: Request, res: Response)
       if (!existingAddress) {
         return response(res, 404, "Address not found");
       }
-
-      existingAddress.addressLine1 = addressLine1;
-      existingAddress.addressLine2 = addressLine2;
-      existingAddress.phoneNumber = phoneNumber;
-      existingAddress.city = city;
-      existingAddress.state = state;
-      existingAddress.pincode = pincode;
+      
+      existingAddress.addressLine1 = addressLine1 || existingAddress.addressLine1;
+      existingAddress.addressLine2 = addressLine2 || existingAddress.addressLine2;
+      existingAddress.phoneNumber = phoneNumber || existingAddress.phoneNumber;
+      existingAddress.city = city || existingAddress.city;
+      existingAddress.state = state || existingAddress.state;
+      existingAddress.pincode = pincode || existingAddress.pincode;
+      
 
       await existingAddress.save();
 
