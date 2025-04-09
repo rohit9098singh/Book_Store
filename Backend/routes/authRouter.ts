@@ -13,7 +13,7 @@ router.post("/verify-email/:token", verifyEmail);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
-router.get("/logout",logout)
+router.post("/logout",logout)
 router.get("/verify-auth",authenticateUser,checkUserAuth)
 
 router.get("/google", passport.authenticate("google", {

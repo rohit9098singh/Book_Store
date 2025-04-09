@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { toggleLoginDialogue } from "@/store/slice/userSlice";
+import { logout, toggleLoginDialogue } from "@/store/slice/userSlice";
 import { RootState } from "@/store/store";
 import { Heart, Lock, LogOut, PiggyBank, Search, ShoppingCart, User, Package, ShieldCheck, HelpCircle, Info, ChevronRight, Menu } from "lucide-react";
 import Image from "next/image";
@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AuthPage from "../Authpage/AuthPage";
+import { useLogoutApiMutation } from "@/store/api";
+import toast from "react-hot-toast";
 
 const Header = () => {
   const [search, setSearch] = useState("");
@@ -21,14 +23,18 @@ const Header = () => {
   const dispatch = useDispatch()
 
   const isLogginOpen = useSelector((state: RootState) => state.user.isLoggedInDialogueOpen)
+  
+  const user = useSelector((state: RootState) => state.user.user);
 
-  const user = {
-    profilePicture: "",
-    name: "lauda lehsun",
-    email: "leudalehsun.com",
-  };
+  console.log("this is what the user contains ",user)
+  
+  const [logoutApi]=useLogoutApiMutation();
 
-  const userPlaceholder = "LL";
+  const userPlaceholder: string = user?.name
+  .split(" ")
+  .map((word: string): string => word[0])
+  .join("").toUpperCase();
+
 
   const handleLoginCLick = () => {
     dispatch(toggleLoginDialogue());
@@ -43,8 +49,14 @@ const Header = () => {
   };
 
   // Logout Handler
-  const handleLogout = () => {
-    console.log("User Logged Out");
+  const handleLogout = async() => {
+    try {
+        await logoutApi({}).unwrap();
+        dispatch(logout());
+        toast.success("User logged out successfully");
+    } catch (error) {
+         toast.error("failed to logout "); 
+    }
   };
 
   const menuItems = [
@@ -53,7 +65,6 @@ const Header = () => {
     { id: "3", icon: <PiggyBank className="h-5 w-5" />, label: "Selling Orders", path: "/account/sellings-products" },
     { id: "4", icon: <ShoppingCart className="h-5 w-5" />, label: "Cart", path: "/checkout/cart" },
     { id: "5", icon: <Heart className="h-5 w-5" />, label: "Wishlist", path: "/account/wishlist" },
-    { id: "6", icon: <Lock className="h-5 w-5" />, label: "Login/Sign up", path: "/login" },
     { id: "7", icon: <Info className="h-5 w-5" />, label: "About Us", path: "/about-us" },
     { id: "8", icon: <ShieldCheck className="h-5 w-5" />, label: "Privacy Policy", path: "/privacy-policy" },
     { id: "9", icon: <HelpCircle className="h-5 w-5" />, label: "Help", path: "/how-it-works" },
@@ -61,7 +72,7 @@ const Header = () => {
 
   return (
     <header className="bg-white shadow-md h-[64px] w-full sticky top-0 z-50">
-      <div className="w-[80%] hidden mx-auto lg:flex items-center justify-between p-4">
+      <div className="w-[85%] hidden mx-auto lg:flex items-center justify-between p-4">
         <Link href="/">
           <Image src="/images/web-logo.png" height={100} width={450} alt="Logo" className="h-12 w-auto" />
         </Link>
@@ -86,20 +97,20 @@ const Header = () => {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg p-2">
-                <Avatar className="w-8 h-8 rounded-full">
+              <Button variant="ghost" className="flex items-center gap-3 cursor-pointer bg-white hover:bg-gray-100 rounded-xl px-3 py-2 shadow-sm transition-all duration-200">
+                <Avatar className="w-9 h-9 rounded-full border border-gray-300 shadow-sm">
                   {user?.profilePicture ? (
                     <AvatarImage src={user?.profilePicture} alt="User" />
                   ) : (
-                    <AvatarFallback className="bg-gray-400">{userPlaceholder}</AvatarFallback>
+                    <AvatarFallback className="bg-gray-200 text-gray-700 font-medium">{user ? userPlaceholder:"👤"}</AvatarFallback>
                   )}
                 </Avatar>
-                My Account
+                <span className="text-sm font-medium text-gray-800">My Account</span>
               </Button>
             </DropdownMenuTrigger>
 
             {/* Dropdown Content */}
-            <DropdownMenuContent className="w-64 p-2 shadow-lg border bg-white">
+            <DropdownMenuContent className="w-72 p-2 shadow-lg border bg-white">
               {user ? (
                 <div className="flex items-center gap-4 p-2 border-b cursor-pointer">
                   <Avatar className="w-12 h-12 rounded-full">
@@ -123,10 +134,7 @@ const Header = () => {
 
               }
              
-               <button onClick={handleLoginCLick} className="flex items-center gap-2 p-2 w-full cursor-pointer hover:bg-gray-100">
-                  <Lock className="h-5 w-5" />
-                  Login / Sign Up
-                </button>
+          
               {menuItems.map((item) => (
                 <button
                   key={item.id}
@@ -208,6 +216,7 @@ const Header = () => {
                 <span className="text-gray-700">Login / Sign Up</span>
               </button>
             )}
+           
 
             {/* Menu Items */}
             <div className="p-2 space-y-1 overflow-y-scroll">

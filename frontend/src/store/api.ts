@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const BASE_URl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+export const BASE_URl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 const API_URLS = {
   // user related urls
@@ -96,7 +96,7 @@ export const api = createApi({
     verifyEmail: builder.mutation({
       query: (token) => ({
         url: API_URLS.VERIFY_EMAIL(token),
-        method: "GET",
+        method: "POST",
         //Even though verifyEmail ek GET request hai,   uska intent data fetch karna nahi hai...
         //Server ko batana ke "yeh user email verify kar raha hai" — ek action perform ho raha hai, data fetch nahi ho raha.
         //Isiliye hum isko mutation treat karte hain.
@@ -129,7 +129,7 @@ export const api = createApi({
         // Isliye hum use mutation treat karte hain — kyunki wo backend pe kuch check/change trigger kar raha hai
       }),
     }),
-    logout: builder.mutation({
+    logoutApi: builder.mutation({
       query: () => ({
         url: API_URLS.LOGOUT,
         method: "POST",
@@ -169,8 +169,9 @@ export const api = createApi({
     getProductById: builder.query({
       query: (id) => ({
         url: API_URLS.GET_PRODUCT_BY_ID(id),
-        
+        // jo ke hum query likh rahe hai isliye hame method batane ke zarurat nhi qke query ka matlab he hota hai get karna kuch bhi
       }),
+      providesTags: ["Product"], // “Jo data abhi fetch ho raha hai, use Product tag se jod do (tag karo).”
     }),
 
     deleteProduct: builder.mutation({
@@ -178,13 +179,14 @@ export const api = createApi({
         url: API_URLS.DELETE_PRODUCT(productId),
         method: "DELETE",
       }),
+      invalidatesTags: ["Product"],
     }),
 
     getProductsBySellerId: builder.query({
       query: (sellerId) => ({
         url: API_URLS.GET_PRODUCT_BY_SELLER_ID(sellerId),
-        method: "GET",
       }),
+      providesTags: ["Product"],
     }),
 
     // Cart Related Endpoints
@@ -194,82 +196,95 @@ export const api = createApi({
         method: "POST",
         body: cartData,
       }),
+      invalidatesTags: ["Cart"],
     }),
     getCartByUserId: builder.query({
       query: (userId) => ({
         url: API_URLS.GET_CART_BY_USER_ID(userId),
-        method: "GET",
       }),
+      providesTags: ["Cart"],
     }),
     removeFromCart: builder.mutation({
       query: (productId) => ({
         url: API_URLS.REMOVE_FROM_CART(productId),
         method: "DELETE",
       }),
+      invalidatesTags: ["Cart"],
     }),
 
     // WishList Related Endpoints
     addToWishList: builder.mutation({
-      query: (wishData) => ({
+      query: (productId) => ({
         url: API_URLS.ADD_TO_WISHLIST,
         method: "POST",
-        body: wishData,
+        body: { productId },
       }),
+      invalidatesTags: ["WishList"],
     }),
+
     getWishlistByUserId: builder.query({
       query: (userId) => ({
         url: API_URLS.GET_WISHLIST_BY_USER_ID(userId),
         method: "GET",
       }),
+      providesTags: ["WishList"],
     }),
+
     removeFromWishlist: builder.mutation({
       query: (productId) => ({
         url: API_URLS.REMOVE_FROM_WISHLIST(productId),
         method: "DELETE",
       }),
+      invalidatesTags: ["WishList"],
     }),
 
     // Order Related Endpoints
-    createOrder: builder.mutation({
-      query: (orderData) => ({
-        url: API_URLS.CREATE_ORDER,
-        method: "POST",
+    createOrUpdateOrder: builder.mutation({
+      query: ({ orderId, orderData }) => ({
+        url: API_URLS.CREATE_ORDER, 
+        method: orderId ? "PATCH" : "POST",
         body: orderData,
       }),
+      invalidatesTags: ["Order"],
     }),
+
     getUserOrders: builder.query({
       query: () => ({
         url: API_URLS.GET_LOGGED_IN_USER_ORDERS,
-        method: "GET",
       }),
+      providesTags: ["Order"],
     }),
+
     getOrderById: builder.query({
-      query: (id) => ({
-        url: API_URLS.GET_ORDER_BY_ID(id),
-        method: "GET",
+      query: (orderId) => ({
+        url: API_URLS.GET_ORDER_BY_ID(orderId),
       }),
+      providesTags: ["Order"],
     }),
+
     createRazorpayPayment: builder.mutation({
-      query: (paymentData) => ({
+      query: (orderId) => ({
         url: API_URLS.CREATE_RAZORPAY_PAYMENT,
         method: "POST",
-        body: paymentData,
+        body: {orderId},
       }),
     }),
 
     // Address Related Endpoints
-    createOrUpdateAddress: builder.mutation({
+    createOrUpdateAddress: builder.mutation<any,any>({
       query: (addressData) => ({
         url: API_URLS.CREATE_OR_UPDATE_ADDRESS,
         method: "POST",
         body: addressData,
       }),
+      invalidatesTags:["Address"]
     }),
-    getAddressByUserId: builder.query({
+    getAddressByUserId: builder.query<any[],void>({
       query: () => ({
         url: API_URLS.GET_ADDRESS_BY_USER_ID,
         method: "GET",
       }),
+      providesTags:["Address"]
     }),
   }),
 });
@@ -281,7 +296,7 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useVerifyAuthMutation,
-  useLogoutMutation,
+  useLogoutApiMutation,
   useUpdateUserMutation,
 
   useAddProductMutation,
@@ -298,7 +313,7 @@ export const {
   useGetWishlistByUserIdQuery,
   useRemoveFromWishlistMutation,
 
-  useCreateOrderMutation,
+  useCreateOrUpdateOrderMutation,
   useGetUserOrdersQuery,
   useGetOrderByIdQuery,
   useCreateRazorpayPaymentMutation,

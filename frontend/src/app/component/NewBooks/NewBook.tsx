@@ -52,7 +52,7 @@ const NewBook = () => {
                                             <CardContent className="p-4 flex flex-col items-center">
                                                 {/* Book Image */}
                                                 <Image
-                                                    src={book.images[0]}
+                                                    src={book.images[0] || "/vercel.svg"}
                                                     alt={book.title}
                                                     width={100}
                                                     height={200}

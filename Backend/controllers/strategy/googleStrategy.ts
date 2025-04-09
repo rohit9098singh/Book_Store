@@ -40,7 +40,7 @@ passport.use(
           name: displayName,
           email: emails?.[0]?.value,
           profilePicture: photos?.[0]?.value,
-          isVerified: true,
+          isVerified: emails?.[0]?.verified ,
           agreeTerms: true,
         });
 
@@ -51,3 +51,5 @@ passport.use(
     }
   )
 );
+export default passport;
+

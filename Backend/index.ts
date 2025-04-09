@@ -10,6 +10,7 @@ import wishlistRoute from "./routes/wishListRoute"
 import addressRoute from "./routes/addressRoute"
 import userRoute from "./routes/userRoute"
 import orderRoute from "./routes/orderRoute"
+import passport from "./controllers/strategy/googleStrategy"
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ const corsOption={
 
 app.use(cors(corsOption));
 app.use(express.json());
+app.use(passport.initialize());
 app.use(cookieParser());
 
 app.use("/api/auth",authRoute);

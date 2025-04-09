@@ -10,6 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
 import Link from 'next/link';
+import { BASE_URl, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/store/api';
+import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { authStatus, toggleLoginDialogue } from '@/store/slice/userSlice';
+import { useRouter } from 'next/navigation';
 
 interface LoginProps {
     isLoginOpen: boolean;
@@ -36,7 +41,13 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
     const [signLoading, setShowSignLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
-    const [forgotPasswordSucess, setForgotPasswordSuccess] = useState(false)
+    const [forgotPasswordSucess, setForgotPasswordSuccess] = useState(false);
+    const [register] = useRegisterMutation()
+    const [login] = useLoginMutation()
+    const [forgotPassword] = useForgotPasswordMutation();
+
+    const dispatch = useDispatch();
+    const router = useRouter();
 
     const togglePasswordVisibility = () => {
         setShowPassword(prev => !prev);
@@ -46,18 +57,88 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
     const { register: registerSignUp, handleSubmit: handleSignUpSubmit, formState: { errors: signUpError } } = useForm<SignUpFormData>();
     const { register: registerForgotPassword, handleSubmit: handleForgotPasswordSubmit, formState: { errors: forgotPasswordError } } = useForm<ForgotPasswordFormData>();
 
-    const loginsubmit=(data:any)=>{
-       console.log("first")
+    const signUpSubmit = async (data: SignUpFormData) => {
+        setShowSignLoading(true)
+        try {
+            const { email, password, name } = data;
+            const result = await register({ email, password, name }).unwrap()
+            console.log("this is the registerd result", result);
+            if (result.success) {
+                toast.success("verification link send to your email sucessfully,please verify your email");
+                dispatch(toggleLoginDialogue())
+
+            }
+        } catch (error) {
+            toast.error("Email already registered")
+            dispatch(toggleLoginDialogue())
+        }
+        finally {
+            setShowSignLoading(false)
+        }
+    }
+    const loginsubmit = async (data: LoginFormData) => {
+        setShowLoginLoading(true)
+        try {
+            const result = await login(data).unwrap()
+            console.log("this is the login  result", result);
+            if (result.success) {
+                toast.success("user logged in successfully");
+
+            }
+            dispatch(toggleLoginDialogue());
+            dispatch(authStatus())
+            // window.location.reload();
+        } catch (error) {
+            console.log(error);
+            toast.error("Email or password is incorrect")
+            dispatch(toggleLoginDialogue())
+            dispatch(authStatus());
+        }
+        finally {
+            setShowLoginLoading(false)
+        }
     }
 
-    const signUpSubmit=(data:any)=>{
-        console.log("Second")
-       
+
+    const handleGoogleLogin = async () => {
+        setGoogleLoading(true)
+        try {
+            router.push(`${BASE_URl}/auth/google`);
+            dispatch(authStatus());
+            dispatch(toggleLoginDialogue());
+
+            setTimeout(() => {
+                toast.success("Google login successfully");
+                setIsLoginOpen(false)
+            }, 3000)
+        } catch (error) {
+            console.log(error);
+            toast.error("Email or password is incorrect")
+            dispatch(toggleLoginDialogue())
+            dispatch(authStatus());
+        }
+        finally {
+            setGoogleLoading(false)
+        }
     }
 
-    const resetPasswordSubmit=(data:any)=>{
-        console.log("Third")
-      
+
+    const onSubmitForgotPassword = async (data: ForgotPasswordFormData) => {
+        setForgotPasswordLoading(true)
+        try {
+            const result = await forgotPassword(data.email).unwrap()
+            if (result.success) {
+                toast.success("password reset link send to your email successfully");
+                setForgotPasswordSuccess(true)
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("failed to send the password reset link to email,please try again later");
+           
+        }
+        finally {
+            setForgotPasswordLoading(false)
+        }
     }
 
     return (
@@ -65,6 +146,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
             <DialogContent className='max-w-md w-full p-6'>
                 <DialogHeader>
                     <DialogTitle className='text-center text-2xl font-bold mb-4'>Welcome To The Book Kart</DialogTitle>
+                    <DialogDescription>{""}</DialogDescription>
                     <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'login' | 'signup' | 'forgot')}>
                         <TabsList className='grid w-full grid-cols-3 mb-6'>
                             <TabsTrigger value='login'>Login</TabsTrigger>
@@ -74,10 +156,10 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                         <AnimatePresence mode='wait'>
                             <motion.div
                                 key={currentTab}
-                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                                transition={{ duration: 0.4, ease: "easeInOut" }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.4 }}
 
                             >
                                 {/* Login Form */}
@@ -126,7 +208,11 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                                 <span className='text-center font-bold'>Login in google...</span>
                                             </div>
                                         ) : (
-                                            <Button variant="outline" className="w-full flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200">
+                                            <Button
+                                                onClick={handleGoogleLogin}
+                                                variant="outline"
+                                                className="w-full flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200"
+                                            >
                                                 <Image
                                                     src={"/icons/google.svg"}
                                                     alt='google image'
@@ -143,7 +229,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
 
                                 {/* Signup Form */}
                                 <TabsContent value='signup'>
-                                    <form onSubmit={handleSignUpSubmit((data) => console.log(data))} className='space-y-4'>
+                                    <form onSubmit={handleSignUpSubmit(signUpSubmit)} className='space-y-4'>
                                         <div className='relative'>
                                             <Input {...registerSignUp('name', { required: 'Name is required' })} placeholder='Full Name' type='text' className='pl-10' />
                                             <User size={20} className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500' />
@@ -199,7 +285,11 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                                 <span className='text-center font-bold'>Sign in google...</span>
                                             </div>
                                         ) : (
-                                            <Button variant="outline" className="w-full flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200">
+                                            <Button
+                                                onClick={handleGoogleLogin}
+                                                variant="outline"
+                                                className="w-full flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200"
+                                            >
                                                 <Image
                                                     src={"/icons/google.svg"}
                                                     alt='google image'
@@ -218,7 +308,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                     {
                                         !forgotPasswordSucess ? (
 
-                                            <form onSubmit={handleForgotPasswordSubmit((data) => console.log(data))} className='space-y-4'>
+                                            <form onSubmit={handleForgotPasswordSubmit(onSubmitForgotPassword)} className='space-y-4'>
                                                 <div className='relative'>
                                                     <Input {...registerForgotPassword('email', { required: 'Email is required' })} placeholder='Enter your email' type='email' className='pl-10' />
                                                     <Mail size={20} className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500' />
@@ -239,6 +329,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                             <motion.div
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
                                                 className='text-center space-y-4'
                                             >
                                                 <CheckCircle className='w-16 h-16 text-green-500 mx-auto' />
@@ -252,7 +343,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                                     onClick={() => setForgotPasswordSuccess(false)}
                                                     className='w-full cursor-pointer'
                                                 >
-                                                    Send Another Link To YOur Email
+                                                    Send Another Link To Your Email
                                                 </Button>
                                             </motion.div>
                                         )
