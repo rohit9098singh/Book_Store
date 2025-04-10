@@ -2,19 +2,18 @@
 import { useVerifyEmailMutation } from '@/store/api';
 import { authStatus, setEmailVerified } from '@/store/slice/userSlice';
 import { RootState } from '@/store/store';
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, spring } from "framer-motion"
 import { CheckCircle, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const page: React.FC = () => {
     const params = useParams();
-    console.log("this is the params",params);
+    const router=useRouter();
     const token = params?.token;
-
-    console.log("this is the token",token);
     const dispatch = useDispatch();
     const [verifyEmail] = useVerifyEmailMutation();
     const isVerifyEmail = useSelector((state: RootState) => state.user.isEmailVerified);
@@ -92,6 +91,12 @@ const page: React.FC = () => {
                         <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Email Already Verified</h2>
                         <p className="text-gray-500">You're all set! You can continue using our services.</p>
+                        <Button
+                         onClick={()=>router.push("/")}
+                         className='bg-blue-500 mt-4 hover:bg-blue-600 text-white font-bold py-2 rounded-full transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer'
+                        >
+                            Go To HomePage    
+                        </Button>
                     </motion.div>
                 )}
             </motion.div>

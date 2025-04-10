@@ -28,25 +28,25 @@ export const createProduct = async (req: Request, res: Response) => {
       return response(res, 400, "image is required");
     }
 
-    // let parsedPaymentDetails = JSON.parse(paymentDetails);
+    let parsedPaymentDetails = JSON.parse(paymentDetails);
 
-    // if (
-    //   paymentMode === "UPI" &&
-    //   (!parsedPaymentDetails || !parsedPaymentDetails.upiId)
-    // ) {
-    //   return response(res, 400, "UPI id is required");
-    // }
+    if (
+      paymentMode === "UPI" &&
+      (!parsedPaymentDetails || !parsedPaymentDetails.upiId)
+    ) {
+      return response(res, 400, "UPI id is required");
+    }
 
-    // if (
-    //   paymentMode === "Bank Account" &&
-    //   (!parsedPaymentDetails ||
-    //     !parsedPaymentDetails.bankDetails ||
-    //     !parsedPaymentDetails.bankDetails.accountNumber ||
-    //     !parsedPaymentDetails.bankDetails.ifscCode ||
-    //     !parsedPaymentDetails.bankDetails.bankName)
-    // ) {
-    //   return response(res, 400, "Bank Account Details Is Required");
-    // }
+    if (
+      paymentMode === "Bank Account" &&
+      (!parsedPaymentDetails ||
+        !parsedPaymentDetails.bankDetails ||
+        !parsedPaymentDetails.bankDetails.accountNumber ||
+        !parsedPaymentDetails.bankDetails.ifscCode ||
+        !parsedPaymentDetails.bankDetails.bankName)
+    ) {
+      return response(res, 400, "Bank Account Details Is Required");
+    }
     const uploadPromise = images.map((file) => uploadToCloudinary(file as any));
 
     const uploadImages = await Promise.all(uploadPromise);
@@ -66,7 +66,7 @@ export const createProduct = async (req: Request, res: Response) => {
       shippingCharge,
       paymentMode,
       seller: sellerId,
-      // paymentDetails: parsedPaymentDetails,
+      paymentDetails: parsedPaymentDetails,
       
       images: imageUrl,
     });

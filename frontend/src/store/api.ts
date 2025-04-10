@@ -110,10 +110,10 @@ export const api = createApi({
       }),
     }),
     resetPassword: builder.mutation({
-      query: ({ token, newPassword }) => ({
+      query: ({ token, password  }) => ({
         url: API_URLS.RESET_PASSWORD(token),
         method: "POST",
-        body: { newPassword },
+        body: { password  },
       }),
     }),
     verifyAuth: builder.mutation({

@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Lock, Mail, User, Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+// import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BASE_URl, useForgotPasswordMutation, useLoginMutation, useRegisterMutation } from '@/store/api';
@@ -66,6 +66,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
             if (result.success) {
                 toast.success("verification link send to your email sucessfully,please verify your email");
                 dispatch(toggleLoginDialogue())
+                // router.push("/")
 
             }
         } catch (error) {
@@ -87,6 +88,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
             }
             dispatch(toggleLoginDialogue());
             dispatch(authStatus())
+            router.push("/")
             // window.location.reload();
         } catch (error) {
             console.log(error);
@@ -109,7 +111,8 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
 
             setTimeout(() => {
                 toast.success("Google login successfully");
-                setIsLoginOpen(false)
+                setIsLoginOpen(false);
+                router.push("/")
             }, 3000)
         } catch (error) {
             console.log(error);
