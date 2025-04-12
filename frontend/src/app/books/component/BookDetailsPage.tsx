@@ -13,7 +13,7 @@ interface BookProps {
     };
 }
 
-const BookDetails: React.FC<BookProps> = ({ book }) => {
+const BookInfo: React.FC<BookProps> = ({ book }) => {
     return (
         <Card className='border border-gray-200 shadow-sm'>
             <CardHeader>
@@ -25,30 +25,30 @@ const BookDetails: React.FC<BookProps> = ({ book }) => {
                 <div className='font-medium text-muted-foreground'>
                     Subject/Title:
                 </div>
-                <div>{book.subject}</div>
+                <div>{book?.subject}</div>
                 <div className='font-medium text-muted-foreground'>
                     Course:
                 </div>
-                <div>{book.classType}</div>
+                <div>{book?.classType}</div>
                 <div className='font-medium text-muted-foreground'>
                     Category:
                 </div>
-                <div>{book.category}</div>
+                <div>{book?.category}</div>
                 <div className='font-medium text-muted-foreground'>
                     Author:
                 </div>
-                <div>{book.author}</div>
+                <div>{book?.author}</div>
                 <div className='font-medium text-muted-foreground'>
                     Edition:
                 </div>
-                <div>{book.edition}</div>
+                <div>{book?.edition}</div>
                 <div className='font-medium text-muted-foreground'>
                     Condition:
                 </div>
-                <div>{book.condition}</div>
+                <div>{book?.condition}</div>
             </CardContent>
         </Card>
     )
 }
 
-export default BookDetails
+export default BookInfo

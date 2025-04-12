@@ -12,6 +12,7 @@ import {
   User,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { userData } from "@/lib/types/type";
 
 interface BookProps {
   book: {
@@ -25,10 +26,7 @@ interface BookProps {
     condition: string;
     subject: string;
     description: string;
-    seller: {
-      name: string;
-      contact: string;
-    };
+    seller: userData
   };
 }
 
@@ -48,8 +46,8 @@ const BookSellerDetails: React.FC<BookProps> = ({ book }) => {
 
         {/* Seller Details */}
         <div className="flex flex-col gap-2">
-          <p className="text-lg font-medium">{book.seller.name}</p>
-          
+          <p className="text-lg font-medium">{book?.seller?.name}</p>
+
           {/* Verified Badge */}
           <Badge className="bg-green-100 text-green-600 flex items-center gap-1 px-3 py-1 rounded-md">
             <CheckCircle2 className="h-4 w-4" />
@@ -57,19 +55,31 @@ const BookSellerDetails: React.FC<BookProps> = ({ book }) => {
           </Badge>
 
           {/* Location */}
-          <div className="flex items-center gap-2 text-gray-600 text-sm">
+          <div className="flex items-center gap-2 text-gray-600 text-sm mt-1 ">
             <MapPin className="h-5 w-5 text-gray-500" />
-            <p>Mirzapur, UP</p>
+            <p>
+              {book?.seller?.address?.[0]?.city && book?.seller?.address?.[0]?.state ? (
+                `${book.seller.address[0].city}, ${book.seller.address[0].state}`
+              ) : (
+                <span >
+                  Location Not Found
+                </span>
+              )}
+            </p>
+
           </div>
         </div>
 
         {/* Contact Details */}
         <div className="flex items-center gap-2 text-gray-600 text-sm">
           <MessageCircle className="h-5 w-5 text-blue-500" />
-          <p className="font-medium">Contact: {book.seller.contact}</p>
+          <p className="font-medium">
+            Contact: {book?.seller?.contact ? book.seller.contact : "No Contact"}
+          </p>
+
         </div>
       </CardContent>
-    </Card>
+    </Card >
   );
 };
 

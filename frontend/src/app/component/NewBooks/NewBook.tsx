@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { books } from "@/lib/constants";
+import { BookDetails } from "@/lib/types/type";
+import { useGetAllProductsQuery } from "@/store/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,6 +11,16 @@ import React, { useEffect, useState } from "react";
 
 const NewBook = () => {
     const [currentBookSlide, setCurrentBookSlide] = useState(0);
+    const { data: apiResponse = {}, isLoading } = useGetAllProductsQuery({});
+
+    const [books, setBooks] = useState<BookDetails[]>([])
+
+    useEffect(() => {
+        if (apiResponse.success) {
+            setBooks(apiResponse.data)
+        }
+    }, [apiResponse])
+
     const booksPerSlide = 3;
     const totalSlides = Math.ceil(books.length / booksPerSlide);
     useEffect(() => {
@@ -43,7 +54,7 @@ const NewBook = () => {
                     >
                         {[...Array(totalSlides)].map((_, slideIndex) => (
                             <div className="flex-none w-full" key={slideIndex}>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                     {books.slice(slideIndex * booksPerSlide, (slideIndex + 1) * booksPerSlide).map((book) => (
                                         <Card
                                             key={book._id}
@@ -52,9 +63,13 @@ const NewBook = () => {
                                             <CardContent className="p-4 flex flex-col items-center">
                                                 {/* Book Image */}
                                                 <Image
-                                                    src={book.images[0] || "/vercel.svg"}
+                                                    src={
+                                                        book.images[0] instanceof File
+                                                            ? URL.createObjectURL(book.images[0])
+                                                            : book.images[0]
+                                                    }
                                                     alt={book.title}
-                                                    width={100}
+                                                    width={350}
                                                     height={200}
                                                     className="rounded-lg object-cover"
                                                 />
@@ -65,7 +80,7 @@ const NewBook = () => {
                                                     {book.price > book.finalPrice && (
                                                         <span className="text-sm text-gray-400 line-through">₹{book.price}</span>
                                                     )}
-                                                    <p className="flex align-end text-xs text-gray-600">({book.condition })</p>
+                                                    <p className="flex align-end text-xs text-gray-600">({book.condition})</p>
                                                 </div>
                                                 {book.price > book.finalPrice && (
                                                     <span className="text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-lg mt-1">

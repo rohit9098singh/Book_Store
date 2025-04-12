@@ -8,8 +8,8 @@ export interface BookDetails {
   classType: string;
   price: number;
   author: string;
-  edition?: string;
-  description?: string;
+  edition: string;
+  description: string;
   finalPrice: number;
   shippingCharge: string;
   seller: userData;
@@ -28,6 +28,7 @@ export interface BookDetails {
 export interface userData {
   name: string;
   email: string;
+  contact: string;
   profilePicture: string;
   phoneNumber: string;
   address: Address[];

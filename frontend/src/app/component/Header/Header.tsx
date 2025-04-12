@@ -26,7 +26,6 @@ const Header = () => {
   
   const user = useSelector((state: RootState) => state.user.user);
 
-  console.log("this is what the user contains ",user)
   
   const [logoutApi]=useLogoutApiMutation();
 
@@ -74,7 +73,7 @@ const Header = () => {
     <header className="bg-white shadow-md h-[64px] w-full sticky top-0 z-50">
       <div className="w-[85%] hidden mx-auto lg:flex items-center justify-between p-4">
         <Link href="/">
-          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo" className="h-12 w-auto" />
+          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo"  priority className="h-12 w-auto" />
         </Link>
 
         <div className=" flex flex-1 items-center justify-center max-w-xl px-4">
@@ -188,7 +187,7 @@ const Header = () => {
             <SheetHeader className="border-b p-4">
               <SheetTitle className="sr-only"></SheetTitle>
             <Link href="/">
-              <Image src="/images/web-logo.png" height={40} width={150} alt="mobile_Logo" className="h-10 w-auto" />
+              <Image src="/images/web-logo.png" height={40} width={150} alt="mobile_Logo"  priority className="h-10 w-auto" />
             </Link>
             </SheetHeader>
 
@@ -247,7 +246,7 @@ const Header = () => {
           </SheetContent>
         </Sheet>
         <Link href="/">
-          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo" className="h-8 md:h-10 w-20 md:w-auto" />
+          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo"  priority className="h-8 md:h-10 w-20 md:w-auto" />
         </Link>
 
         <div className=" flex flex-1 items-center justify-center max-w-xl px-4">

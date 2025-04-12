@@ -1,9 +1,9 @@
 "use client"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
-import { books, filters } from '@/lib/constants';
+import {  filters } from '@/lib/constants';
 import Link from 'next/link';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { formatDistanceToNow } from "date-fns"
 import BookLoader from '@/lib/BookLoader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,8 @@ import Pagination from '../component/Pagination/Pagination';
 import { Heart } from 'lucide-react';
 import NoData from '../component/NoData/NoData';
 import { useRouter } from 'next/navigation';
+import { useGetAllProductsQuery } from '@/store/api';
+import { BookDetails } from '@/lib/types/type';
 
 const page = () => {
     const [currentpage, setCurrentPage] = useState(1);
@@ -22,8 +24,15 @@ const page = () => {
     const [selctedType, setSelectedType] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
     const [sortOption, setSortOption] = useState("newest");
-    const [isLoading, setIsLoading] = useState(false)
+    const {data:apiResponse={},isLoading}=useGetAllProductsQuery({});
+    
+    const [books,setBooks]=useState<BookDetails[]>([])
 
+     useEffect(()=>{
+         if(apiResponse.success){
+            setBooks(apiResponse.data)
+         }
+     },[apiResponse])
     const router=useRouter()
     const bookPerPages = 6;
 
@@ -88,6 +97,7 @@ const page = () => {
     const totalPages = Math.ceil(sortedBooks.length / bookPerPages);
 
     const paginatedBooks = sortedBooks.slice((currentpage - 1) * bookPerPages, currentpage * bookPerPages);
+    console.log("this is the paginated book",paginatedBooks)
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page)
@@ -192,9 +202,9 @@ const page = () => {
                                                     <Link href={`/books/${book._id}`}>
                                                         <div className="relative w-full">
                                                             <Image
-                                                                src={book.images[0]}
+                                                                src={typeof book.images[0] === 'string' ? book.images[0] : URL.createObjectURL(book.images[0])}
                                                                 alt={book.title}
-                                                                height={300}
+                                                                height={100}
                                                                 width={400}
                                                                 className="h-[250px] w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                                             />
@@ -203,11 +213,11 @@ const page = () => {
                                                                     {calculateDiscount(book.price, book.finalPrice)}% OFF
                                                                 </Badge>
                                                             )}
-                                                            <button
+                                                            {/* <button
                                                                 className="absolute right-2 top-2 rounded-full bg-white/80 cursor-pointer p-2 transition-all duration-300 hover:bg-white shadow-lg hover:shadow-xl active:scale-100"
                                                             >
                                                                 <Heart size={20} className="text-red-500 transition-transform duration-200 hover:scale-110" />
-                                                            </button>
+                                                            </button> */}
                                                         </div>
 
                                                         <div className="mt-3">

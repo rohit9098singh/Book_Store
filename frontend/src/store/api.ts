@@ -194,7 +194,7 @@ export const api = createApi({
       query: (cartData) => ({
         url: API_URLS.ADD_TO_CART,
         method: "POST",
-        body: cartData,
+        body: cartData
       }),
       invalidatesTags: ["Cart"],
     }),
