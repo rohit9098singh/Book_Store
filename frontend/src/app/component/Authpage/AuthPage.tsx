@@ -149,7 +149,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
             <DialogContent className='max-w-md w-full p-6'>
                 <DialogHeader>
                     <DialogTitle className='text-center text-2xl font-bold mb-4'>Welcome To The Book Kart</DialogTitle>
-                    <DialogDescription>{""}</DialogDescription>
+                    <DialogDescription>{" "}</DialogDescription>
                     <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'login' | 'signup' | 'forgot')}>
                         <TabsList className='grid w-full grid-cols-3 mb-6'>
                             <TabsTrigger value='login'>Login</TabsTrigger>

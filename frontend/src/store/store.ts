@@ -5,6 +5,7 @@ import { persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PURGE, PERSIST, 
 import userReducer from "./slice/userSlice";
 import cartReducer from "./slice/cartSlice"
 import wishlistReducer from "./slice/wishlistSlice"
+import checkoutReducer from "./slice/checkoutSlice"
 import { api } from "./api"; //  Ensure `api` is imported!
 
 // 🔥 Persist Configuration for User
@@ -15,6 +16,7 @@ const userPersistConfig = {
 };
 const cartPersistConfig={key:"cart",storage,whitelist:['items']}
 const wishlistPersistConfig={key:"wishlist",storage,}
+const checkoutPersistConfig={key:"checkout",storage,}
 
 
 //  Persisted Reducer Create Karo
@@ -24,6 +26,8 @@ const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
 const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
 const persistedWishlistReducer = persistReducer(wishlistPersistConfig, wishlistReducer);
 
+const persistedCheckoutReducer = persistReducer(checkoutPersistConfig, checkoutReducer);
+
 
 //  Redux Store Configure Karo
 export const store = configureStore({
@@ -31,7 +35,8 @@ export const store = configureStore({
     [api.reducerPath]: api.reducer, 
     user: persistedUserReducer, //  Persisted Reducer Use Ho Raha Hai
     cart:persistedCartReducer,
-    wishlist:persistedWishlistReducer
+    wishlist:persistedWishlistReducer,
+    ckeckout:persistedCheckoutReducer
   },
 
   middleware: (getDefaultMiddleware) =>

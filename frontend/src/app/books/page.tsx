@@ -14,27 +14,29 @@ import { Badge } from '@/components/ui/badge';
 import Pagination from '../component/Pagination/Pagination';
 import { Heart } from 'lucide-react';
 import NoData from '../component/NoData/NoData';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetAllProductsQuery } from '@/store/api';
 import { BookDetails } from '@/lib/types/type';
 
 const page = () => {
     const [currentpage, setCurrentPage] = useState(1);
     const [selectedCondition, setSelectedCondition] = useState<string[]>([]); //(["New", "Used"])
-    const [selctedType, setSelectedType] = useState<string[]>([]);
+    const [selectedType, setSelectedType] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
     const [sortOption, setSortOption] = useState("newest");
-    const {data:apiResponse={},isLoading}=useGetAllProductsQuery({});
-    
     const [books,setBooks]=useState<BookDetails[]>([])
+    const {data:apiResponse={},isLoading}=useGetAllProductsQuery({});
+    const router=useRouter()
+    const bookPerPages = 6;
 
+    const searchTerms=new URLSearchParams(window.location.search).get("search") || "";
+
+   
      useEffect(()=>{
          if(apiResponse.success){
             setBooks(apiResponse.data)
          }
      },[apiResponse])
-    const router=useRouter()
-    const bookPerPages = 6;
 
     const toggleFilter = (section: string, item: string) => {
         const updateFilter = (prev: string[]) => {
@@ -67,14 +69,21 @@ const page = () => {
         const conditionMatch = selectedCondition.length === 0 ||
             selectedCondition.map(condition => condition.toLowerCase()).includes(book.condition.toLowerCase());
 
-        const typeMatch = selctedType.length === 0 ||
-            selctedType.map(type => type.toLowerCase()).includes(book.classType.toLowerCase());
+        const typeMatch = selectedType.length === 0 ||
+        selectedType.map(type => type.toLowerCase()).includes(book.classType.toLowerCase());
 
         const categoryMatch = selectedCategory.length === 0 ||
             selectedCategory.map(category => category.toLowerCase()).includes(book.category.toLowerCase());
 
+            const searchMatch = searchTerms ? 
+            book.title.toLowerCase().includes(searchTerms.toLowerCase().trim()) ||
+            book.author.toLowerCase().includes(searchTerms.toLowerCase().trim()) ||
+            (typeof book.category === 'string' && book.category.toLowerCase().includes(searchTerms.toLowerCase().trim())) ||
+            book.subject.toLowerCase().includes(searchTerms.toLowerCase().trim()) 
+            : true;
 
-        return conditionMatch && typeMatch && categoryMatch;
+
+        return conditionMatch && typeMatch && categoryMatch && searchMatch;
     });
 
     const sortedBooks = [...filterBooks].sort((a, b) => {
@@ -144,7 +153,7 @@ const page = () => {
                                                     id={value}
                                                     checked={
                                                         key === "condition" ? selectedCondition.includes(value) :
-                                                            key === "classType" ? selctedType.includes(value) :
+                                                            key === "classType" ? selectedType.includes(value) :
                                                                 selectedCategory.includes(value)
                                                     }
                                                     onCheckedChange={() => toggleFilter(key, value)}
@@ -264,7 +273,7 @@ const page = () => {
     )
 }
 
-export default page
+export default page;
 
 
 {

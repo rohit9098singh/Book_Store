@@ -225,7 +225,7 @@ const Page = () => {
                                 ) : (
                                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
                                         <ShoppingCart className="text-blue-500" size={24} />
-                                        <span>Buy Now</span>
+                                        <span>Add To Cart</span>
                                     </div>
                                 )}
                             </Button>

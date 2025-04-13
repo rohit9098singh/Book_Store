@@ -11,34 +11,50 @@ import { Heart, Lock, LogOut, PiggyBank, Search, ShoppingCart, User, Package, Sh
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AuthPage from "../Authpage/AuthPage";
-import { useLogoutApiMutation } from "@/store/api";
+import { useGetCartByUserIdQuery, useLogoutApiMutation } from "@/store/api";
 import toast from "react-hot-toast";
+import { setCart } from "@/store/slice/cartSlice";
 
 const Header = () => {
-  const [search, setSearch] = useState("");
+  // const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const dispatch = useDispatch()
 
   const isLogginOpen = useSelector((state: RootState) => state.user.isLoggedInDialogueOpen)
-  
+
   const user = useSelector((state: RootState) => state.user.user);
 
-  
-  const [logoutApi]=useLogoutApiMutation();
+
+  const [logoutApi] = useLogoutApiMutation();
 
   const userPlaceholder: string = user?.name
-  .split(" ")
-  .map((word: string): string => word[0])
-  .join("").toUpperCase();
+    .split(" ")
+    .map((word: string): string => word[0])
+    .join("").toUpperCase();
 
+  const cartItemCount = useSelector((state: RootState) => state.cart.items.length)
+
+  const { data: cartData } = useGetCartByUserIdQuery(user?._id, {
+    skip: !user,
+  });
+
+  useEffect(() => {
+    if (cartData?.success && cartData.data) {
+      dispatch(setCart(cartData.data))
+    }
+  }, [cartData, dispatch])
 
   const handleLoginCLick = () => {
     dispatch(toggleLoginDialogue());
   }
 
+  const handleSearch = () => {
+    router.push(`/books?search=${encodeURIComponent(searchTerm)}`)
+  }
   const navigateTo = (path: string) => {
     if (user) {
       router.push(path);
@@ -48,13 +64,13 @@ const Header = () => {
   };
 
   // Logout Handler
-  const handleLogout = async() => {
+  const handleLogout = async () => {
     try {
-        await logoutApi({}).unwrap();
-        dispatch(logout());
-        toast.success("User logged out successfully");
+      await logoutApi({}).unwrap();
+      dispatch(logout());
+      toast.success("User logged out successfully");
     } catch (error) {
-         toast.error("failed to logout "); 
+      toast.error("failed to logout ");
     }
   };
 
@@ -73,7 +89,7 @@ const Header = () => {
     <header className="bg-white shadow-md h-[64px] w-full sticky top-0 z-50">
       <div className="w-[85%] hidden mx-auto lg:flex items-center justify-between p-4">
         <Link href="/">
-          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo"  priority className="h-12 w-auto" />
+          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo" priority className="h-12 w-auto" />
         </Link>
 
         <div className=" flex flex-1 items-center justify-center max-w-xl px-4">
@@ -82,15 +98,20 @@ const Header = () => {
               type="text"
               placeholder="Book Name / Author / Publisher / Subject"
               className="w-full pr-12 border rounded-md p-2 focus:outline-none"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
             />
-            <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer" />
+            <Search
+              onClick={handleSearch}
+              className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer" />
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href="/selling-books">
+          <Link href="/Book-sell">
             <Button className="bg-yellow-400 text-black cursor-pointer hover:bg-yellow-500">Sell Used Book</Button>
           </Link>
 
@@ -101,7 +122,7 @@ const Header = () => {
                   {user?.profilePicture ? (
                     <AvatarImage src={user?.profilePicture} alt="User" />
                   ) : (
-                    <AvatarFallback className="bg-gray-200 text-gray-700 font-medium">{user ? userPlaceholder:"👤"}</AvatarFallback>
+                    <AvatarFallback className="bg-gray-200 text-gray-700 font-medium">{user ? userPlaceholder : "👤"}</AvatarFallback>
                   )}
                 </Avatar>
                 <span className="text-sm font-medium text-gray-800">My Account</span>
@@ -132,8 +153,8 @@ const Header = () => {
               )
 
               }
-             
-          
+
+
               {menuItems.map((item) => (
                 <button
                   key={item.id}
@@ -161,9 +182,9 @@ const Header = () => {
             <div className="relative flex items-center cursor-pointer">
               <div className="relative">
                 <ShoppingCart className="h-6 w-6" />
-                {user && (
+                {user && cartItemCount > 0 && (
                   <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-rose-500 text-white rounded-full px-1 text-xs flex items-center justify-center w-5 h-5">
-                    3
+                    {cartItemCount}
                   </span>
                 )}
               </div>
@@ -186,9 +207,9 @@ const Header = () => {
           <SheetContent side="left" className="w-80 p-0 ">
             <SheetHeader className="border-b p-4">
               <SheetTitle className="sr-only"></SheetTitle>
-            <Link href="/">
-              <Image src="/images/web-logo.png" height={40} width={150} alt="mobile_Logo"  priority className="h-10 w-auto" />
-            </Link>
+              <Link href="/">
+                <Image src="/images/web-logo.png" height={40} width={150} alt="mobile_Logo" priority className="h-10 w-auto" />
+              </Link>
             </SheetHeader>
 
             {/* User Profile Section */}
@@ -215,7 +236,7 @@ const Header = () => {
                 <span className="text-gray-700">Login / Sign Up</span>
               </button>
             )}
-           
+
 
             {/* Menu Items */}
             <div className="p-2 space-y-1 overflow-y-scroll">
@@ -246,7 +267,7 @@ const Header = () => {
           </SheetContent>
         </Sheet>
         <Link href="/">
-          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo"  priority className="h-8 md:h-10 w-20 md:w-auto" />
+          <Image src="/images/web-logo.png" height={100} width={450} alt="Logo" priority className="h-8 md:h-10 w-20 md:w-auto" />
         </Link>
 
         <div className=" flex flex-1 items-center justify-center max-w-xl px-4">
@@ -255,29 +276,32 @@ const Header = () => {
               type="text"
               placeholder="search books...."
               className="w-full pr-12 border rounded-md p-2 focus:outline-none"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
             />
             <Search className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer" />
           </div>
         </div>
         <Link href={"/checkout/cart"}>
-            <div className="relative flex items-center cursor-pointer">
-              <div className="relative">
-                <ShoppingCart className="h-6 w-6" />
-                {user && (
-                  <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-rose-500 text-white rounded-full px-1 text-xs flex items-center justify-center w-5 h-5">
-                    3
-                  </span>
-                )}
-              </div>
+          <div className="relative flex items-center cursor-pointer">
+            <div className="relative">
+              <ShoppingCart className="h-6 w-6" />
+              {user && cartItemCount > 0 && (
+                <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-rose-500 text-white rounded-full px-1 text-xs flex items-center justify-center w-5 h-5">
+                  {cartItemCount}
+                </span>
+              )}
             </div>
-          </Link>
-        
+          </div>
+        </Link>
+
       </div>
       {
         isLogginOpen &&
-      <AuthPage isLoginOpen={isLogginOpen} setIsLoginOpen={handleLoginCLick}/>
+        <AuthPage isLoginOpen={isLogginOpen} setIsLoginOpen={handleLoginCLick} />
       }
     </header>
   );
