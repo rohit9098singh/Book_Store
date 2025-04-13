@@ -1,12 +1,16 @@
 "use client"
-import CheckOutCartItem from '@/app/component/CheckOutCartItem/CheckOutCartItem';
+import CheckOutCartItem from '@/app/component/CheckOutCartItem/componets/CheckOutCartItem';
+import PriceDetails from '@/app/component/CheckOutCartItem/componets/PriceDetails';
 import NoData from '@/app/component/NoData/NoData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAddToWishListMutation, useGetCartByUserIdQuery, useRemoveFromCartMutation, useRemoveFromWishlistMutation } from '@/store/api';
+import { Address } from '@/lib/types/type';
+import { useAddToWishListMutation, useCreateOrUpdateOrderMutation, useCreateRazorpayPaymentMutation, useGetCartByUserIdQuery, useGetOrderByIdQuery, useRemoveFromCartMutation, useRemoveFromWishlistMutation } from '@/store/api';
 import { setCart } from '@/store/slice/cartSlice';
+import { setCheckoutSteps, setOrderId } from '@/store/slice/checkoutSlice';
 import { toggleLoginDialogue } from '@/store/slice/userSlice';
 import { addToWishListAction, removeFromWishListAction } from '@/store/slice/wishlistSlice';
 import { RootState } from '@/store/store';
+import { access } from 'fs';
 import { ChevronRight, CreditCard, MapPin, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -24,8 +28,26 @@ const page = () => {
     const [removeFromCart] = useRemoveFromCartMutation();
     const [addToWishList] = useAddToWishListMutation();
     const [removeFromWishlist] = useRemoveFromWishlistMutation();
+    const [createOrUpdateOrder] = useCreateOrUpdateOrderMutation()
     const wishList = useSelector((state: RootState) => state.wishlist.items)
-    const cart = useSelector((state: RootState) => state.cart)
+    const cart = useSelector((state: RootState) => state.cart);
+    const { data: orderData, isLoading: isOrderLoading } = useGetOrderByIdQuery(orderId || "");
+    const [createRazorpayPayment] = useCreateRazorpayPaymentMutation();
+    const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
+    console.log("here is the order data ",orderData)
+
+    useEffect(() => {
+        if (orderData && orderData.data && orderData.data.length > 0) {
+            setSelectedAddress(orderData.data[0].shippingAddress);
+        }
+    }, [orderData]);
+
+
+    useEffect(() => {
+        if (steps === "address" && !selectedAddress) {
+            setShowAddressDialogue(true)
+        }
+    }, [steps])
 
     useEffect(() => {
         if (cartData?.success && cartData.data) {
@@ -45,6 +67,7 @@ const page = () => {
             toast.error("failed to remove from the cart")
         }
     }
+
     const handleOpenLogin = () => {
         dispatch(toggleLoginDialogue());
 
@@ -53,7 +76,6 @@ const page = () => {
     const handleAddToWhistlist = async (productId: string) => {
         try {
             const isWishList = wishList.some((item) => item.products.includes(productId))
-            console.log("it is tru or false", isWishList)
             if (isWishList) {
                 const result = await removeFromWishlist(productId).unwrap();
                 if (result.success) {
@@ -77,6 +99,71 @@ const page = () => {
             toast.error(errorMessage || "failed to add or remove to wishlist");
         }
     };
+
+
+    const totalAmount = cart.items.reduce(
+        (acc, item) => acc + (item.product.finalPrice * item.quantity),
+        0
+    );
+    const totalOriginalAmount = cart.items.reduce(
+        (acc, item) => acc + (item.product.price * item.quantity),
+        0
+    );
+
+    const totalDiscount = totalOriginalAmount - totalAmount;
+
+    const handleProceedToCheckout = async () => {
+        try {
+            if (steps === "cart") {
+                const result = await createOrUpdateOrder({
+                    data: {
+                        items: cart.items,
+                        totalAmount: totalAmount
+                    }
+                }).unwrap();
+
+                if (result.success) {
+                    toast.success("Order created successfully");
+                    dispatch(setOrderId(result.data._id));
+                    dispatch(setCheckoutSteps("address"));
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } else if (steps === "address") {
+                if (selectedAddress) {
+                    dispatch(setCheckoutSteps("payment"));
+                } else {
+                    setShowAddressDialogue(true);
+                }
+
+            } else if (steps === "payment") {
+                 handlepayment()
+            }
+
+        } catch (error) {
+            toast.error("Failed to proceed with checkout");
+            console.error("Checkout error:", error);
+        }
+    };
+
+    const handleSelectAddress=async (address:Address)=>{
+        setSelectedAddress(address);
+        setShowAddressDialogue(false);
+        if(orderId){
+            try {
+                await createOrUpdateOrder({updates:{orderId,shippingAddress:address}}).unwrap();
+                toast.success("Address updated successfully")
+            } catch (error) {
+                 console.log(error);
+                 toast.error("failed to update address")
+            }
+        }
+    }
+     const handlepayment=()=>{
+
+     }
+
     if (!user) {
         return <NoData
             message="Please log in to access your cart."
@@ -95,7 +182,6 @@ const page = () => {
             imageUrl="/images/cart.webp"
             onClick={() => router.push("/books")}
         />
-
     }
 
     return (
@@ -113,7 +199,7 @@ const page = () => {
 
                 {/* Step Indicator */}
                 <div className="mx-auto px-4 max-w-6xl">
-                    <div className="mb-8 bg-yellow-50 py-6 px-4 rounded-lg shadow-sm">
+                    <div className="mb-8  py-6 px-4 rounded-lg">
                         <div className="flex justify-center items-center gap-6">
                             {/* Cart Step */}
                             <div className="flex items-center gap-2">
@@ -144,20 +230,30 @@ const page = () => {
                         </div>
                     </div>
                     <div className='grid gap-8 lg:grid-cols-3'>
-                          <div className='lg:col-span-2'>
-                              <Card className='shadow-lg'>
+                        <div className='lg:col-span-2'>
+                            <Card className='shadow-lg bg-gray-50'>
                                 <CardHeader>
                                     <CardTitle className='text-2xl'>Order Summary</CardTitle>
                                     <CardDescription>Review Your Items</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                     <CheckOutCartItem/>
+                                    <CheckOutCartItem
+                                        items={cart.items}
+                                        onRemoveItem={handleRemoveItems}
+                                        onToggleWishlist={handleAddToWhistlist}
+                                        wishlist={wishList}
+                                    />
+                                    <div>
+                                        <PriceDetails
+
+                                        />
+                                    </div>
                                 </CardContent>
-                              </Card>
-                          </div>
+                            </Card>
+                        </div>
                     </div>
                 </div>
-           </div>
+            </div>
         </>
     )
 }
