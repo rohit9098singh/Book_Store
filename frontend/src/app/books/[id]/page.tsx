@@ -42,7 +42,6 @@ const Page = () => {
     const user = useSelector((state: RootState) => state.user.user);
     console.log("take the user", user)
 
-    const userId = user._id
 
     useEffect(() => {
         if (apiResponse.success) {

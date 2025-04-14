@@ -13,6 +13,7 @@ interface cartItemsProp {
 
 }
 const CheckOutCartItem: React.FC<cartItemsProp> = ({ items, onToggleWishlist, onRemoveItem, wishlist }) => {
+  
   return (
     <ScrollArea className='h-[400px] pr-4 '>
       {items.map((item) => (
@@ -43,7 +44,7 @@ const CheckOutCartItem: React.FC<cartItemsProp> = ({ items, onToggleWishlist, on
             </div>
             <div className='mt-2 flex items-center gap-2'>
               <Button
-                className='w-[100px] md:w-[200px] cursor-pointer' variant={"outline"}
+                className='w-[100px] md:w-[200px] cursor-pointer drop-shadow-md' variant={"outline"}
                 onClick={()=>onRemoveItem(item.product._id)}
               > 
                 <Trash2 className='w-4 h-4 mr-1 text-red-500'/>
@@ -54,7 +55,7 @@ const CheckOutCartItem: React.FC<cartItemsProp> = ({ items, onToggleWishlist, on
                 variant='outline'
                 size={"sm"}
                 onClick={()=>onToggleWishlist(item.product._id)}
-                className='cursor-pointer'
+                className='cursor-pointer drop-shadow-md'
               >
                <Heart
                  className={`h-4 w-4 mr-1 ${wishlist.some((w)=>w.products.includes(item.product._id))?"fill-red-500" : ""}`}   

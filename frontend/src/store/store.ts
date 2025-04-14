@@ -36,7 +36,7 @@ export const store = configureStore({
     user: persistedUserReducer, //  Persisted Reducer Use Ho Raha Hai
     cart:persistedCartReducer,
     wishlist:persistedWishlistReducer,
-    ckeckout:persistedCheckoutReducer
+    checkout:persistedCheckoutReducer
   },
 
   middleware: (getDefaultMiddleware) =>
