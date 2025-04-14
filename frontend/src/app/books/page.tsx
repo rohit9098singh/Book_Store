@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import Pagination from '../component/Pagination/Pagination';
-import { Heart } from 'lucide-react';
+// import { Heart } from 'lucide-react';
 import NoData from '../component/NoData/NoData';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGetAllProductsQuery } from '@/store/api';

@@ -66,14 +66,13 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
       paymentMethod,
       totalAmount,
       paymentDetails: paymentDetails || null,
-      paymentStatus: paymentDetails ? "complete" : "pending",
-      status: paymentDetails ? "processing" : "pending",
+      paymentStatus: "complete",
+      status: "processing"
     });
-
     await order.save();
     if (paymentDetails) {
       await Cart.findOneAndUpdate(
-        { userId },
+        { user: userId  },
         { $set: { items: [] } },
         { new: true }
       );
@@ -81,6 +80,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
 
     return response(res, 201, "Order created successfully", order);
   } catch (error) {
+    console.log("backend error",error)
     return response(res, 500, "Something went wrong", error);
   }
 };

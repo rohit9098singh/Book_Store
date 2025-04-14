@@ -19,7 +19,7 @@ export interface IOrder extends Document{
         razorpay_payment_id?:string;
         razorpay_signature?:string;
     }
-    status:"processing"|"shipped"|"delivered"|"cancelled"
+    status:string;
 }
 
 
@@ -41,8 +41,12 @@ const orderSchema=new Schema<IOrder>({
         razorpay_payment_id:{type:String},
         razorpay_signature:{type:String},
      },
-     status:{type:String,enum:["processing","shipped","delivered","cancelled"],default:null}
+     status:{
+             type:String,
+            }
 },{timestamps:true})
 
 
-export default mongoose.model<IOrder>("Order",orderSchema)
+
+
+export default mongoose.models.Order || mongoose.model<IOrder>("Order", orderSchema)

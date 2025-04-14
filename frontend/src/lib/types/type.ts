@@ -77,7 +77,7 @@ export interface Order {
   items: OrderItem;
   totalAmount: number;
   createdAt: Date;
-
+  
   shippingAddress: Address;
   paymentStatus: "pending" | "complete" | "failed";
   paymentMethod: string;

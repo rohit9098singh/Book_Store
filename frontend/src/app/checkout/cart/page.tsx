@@ -149,18 +149,25 @@ const page = () => {
   const finalAmount = totalAmount + maximumShippingCharge
 
   const handleProceedToCheckout = async () => {
+    console.log("yah aaya",cart.items)
+
     try {
       if (steps === "cart") {
+        console.log("aage gya")
+
         //Jab tu cart step pe hota hai, order abhi tak server pe exist nahi karta.
         //Toh wo yaha pe createOrUpdateOrder() ko call karta hai first time:
         // Isse ek naya order create hota hai (server me).
         const result = await createOrUpdateOrder({
           orderData: {
             items: cart.items,
-            totalAmount: totalAmount
+            totalAmount: totalAmount,
+            
           }
         }).unwrap();
-
+        console.log("try ke andar aaya ke nhi vo")
+        console.log("check the result",result.success)
+        
         if (result.success) {
           toast.success("Order created successfully");
           dispatch(setOrderId(result.data._id));
@@ -182,7 +189,7 @@ const page = () => {
       }
     } catch (error) {
       toast.error("Failed to proceed with checkout");
-      console.error("Checkout error:", error);
+      console.error("Checkout error this is :", error);
     }
   };
 
@@ -195,7 +202,10 @@ const page = () => {
         //Isliye yeh call kiya ja raha: createOrUpdateOrder
         await createOrUpdateOrder({
           orderId,
-          orderData: { shippingAddress: address }
+          orderData: {
+            shippingAddress: address,
+            status: "processing"
+          }
         }).unwrap();
 
         toast.success("Address updated successfully");
@@ -353,9 +363,9 @@ const page = () => {
             </DialogHeader>
             <CheckoutAddress
               onAddressSelect={handleSelectAddress}
-              selectedAddress={selectedAddress?._id || ""}
+              selectedAddressId={selectedAddress?._id || ""}
             />
-            
+
           </DialogContent>
         </Dialog>
       </div>
