@@ -10,13 +10,13 @@ import * as z from 'zod';
 import { addressSchema } from './Validation/CheckoutForm';
 import BookLoader from '@/lib/BookLoader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@radix-ui/react-checkbox';
 import { Button } from '@/components/ui/button';
 import { Pencil, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Create form type from schema
 type AddressForm = z.infer<typeof addressSchema>;
@@ -24,9 +24,7 @@ type AddressForm = z.infer<typeof addressSchema>;
 interface AddressResponse {
   success: boolean;
   message: string;
-  data: {
-    address: Address[];
-  };
+  data: Address[];
 }
 
 interface CheckoutAddressProps {
@@ -43,12 +41,15 @@ const CheckoutAddress: React.FC<CheckoutAddressProps> = ({
     isLoading: boolean;
   };
 
+  console.log("dekh to mc kya hai",addressData)
+
   const [createOrUpdateAddress] = useCreateOrUpdateAddressMutation();
 
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState<Address | null>(null);
 
-  const addresses = addressData?.data?.address || [];
+  const addresses = addressData?.data || [];
+  console.log("oryah pe",addresses)
 
   const form = useForm<AddressForm>({
     resolver: zodResolver(addressSchema),
@@ -114,7 +115,7 @@ const CheckoutAddress: React.FC<CheckoutAddressProps> = ({
                 <Checkbox
                   checked={selectedAddressId === address._id}
                   onCheckedChange={() => onAddressSelect(address)}
-                  className='h-5 w-5'
+                  className='h-5 w-5 rounded border border-gray-400 '
                 />
                 <div className='flex items-center justify-between'>
                   <Button
@@ -245,11 +246,9 @@ const CheckoutAddress: React.FC<CheckoutAddressProps> = ({
                 )}
               />
 
-              <div className='flex justify-end pt-4'>
-                <Button type='submit'>
+                <Button type='submit' className='w-full mt-4 bg-blue-500 hover:bg-blue-600'>
                   {isEditingAddress ? "Update Address" : "Add Address"}
                 </Button>
-              </div>
             </form>
           </Form>
 

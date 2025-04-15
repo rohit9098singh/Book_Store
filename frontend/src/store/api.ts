@@ -37,7 +37,10 @@ const API_URLS = {
     `${BASE_URl}/wishlist/remove/${productId}`,
 
   // order related urls
-  CREATE_ORDER: `${BASE_URl}/order/create-order`,
+  CREATE_ORDER: (orderId?: string) =>
+    orderId
+      ? `${BASE_URl}/order/create-order/${orderId}` // PATCH
+      : `${BASE_URl}/order/create-order`, 
   GET_LOGGED_IN_USER_ORDERS: `${BASE_URl}/order/user-order`,
   GET_ORDER_BY_ID: (id: string) => `${BASE_URl}/order/user-order/${id}`,
   CREATE_RAZORPAY_PAYMENT: `${BASE_URl}/order/payment-razorpay`,
@@ -241,7 +244,7 @@ export const api = createApi({
     // Order Related Endpoints
     createOrUpdateOrder: builder.mutation({
       query: ({ orderId, orderData }) => ({
-        url: API_URLS.CREATE_ORDER, 
+        url: API_URLS.CREATE_ORDER(orderId),
         method: orderId ? "PATCH" : "POST",
         body: orderData,
       }),

@@ -27,11 +27,7 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
       return response(res, 400, "User not authenticated");
     }
 
-    console.log("User ID:", userId);
     const cart = await Cart.findOne({ user: userId }).populate("items.product");
-
-    console.log("Cart:", cart);
-
     if (!cart || cart.items.length === 0) {
       return response(res, 400, "Your cart seems to be empty");
     }
@@ -39,12 +35,20 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
     let order;
 
     if (orderId) {
+      //  If orderId is sent from frontend
       order = await Order.findById(orderId);
 
       if (!order) {
         return response(res, 404, "Order not found with given ID");
       }
+    } else {
+      //  If no orderId is sent, try to find a pending order for the user
+      order = await Order.findOne({ user: userId, status: "pending" });
+    }
 
+    if (order) {
+      //  Update existing order
+      order.items = cart.items; // in case cart has changed
       order.shippingAddress = shippingAddress || order.shippingAddress;
       order.paymentMethod = paymentMethod || order.paymentMethod;
       order.totalAmount = totalAmount || order.totalAmount;
@@ -56,41 +60,56 @@ export const createOrUpdateOrder = async (req: Request, res: Response) => {
       }
 
       await order.save();
+
+      //  Clear cart if payment done
+      if (paymentDetails) {
+        await Cart.findOneAndUpdate(
+          { user: userId },
+          { $set: { items: [] } },
+          { new: true }
+        );
+      }
+
       return response(res, 200, "Order updated successfully", order);
     }
 
-    order = new Order({
+    //  No existing order, create a new one
+    const newOrder = new Order({
       user: userId,
       items: cart.items,
       shippingAddress,
       paymentMethod,
       totalAmount,
       paymentDetails: paymentDetails || null,
-      paymentStatus: "complete",
-      status: "processing"
+      paymentStatus: paymentDetails ? "complete" : "pending",
+      status: paymentDetails ? "processing" : "pending",
     });
-    await order.save();
+
+    await newOrder.save();
+
+    //  Clear cart if payment done
     if (paymentDetails) {
       await Cart.findOneAndUpdate(
-        { user: userId  },
+        { user: userId },
         { $set: { items: [] } },
         { new: true }
       );
     }
 
-    return response(res, 201, "Order created successfully", order);
+    return response(res, 201, "Order created successfully", newOrder);
   } catch (error) {
-    console.log("backend error",error)
+    console.error("backend error", error);
     return response(res, 500, "Something went wrong", error);
   }
 };
+
 
 // koi bhi user ka order check krne ke liye for
 export const getOrderById = async (req: Request, res: Response) => {
   try {
     const orderId = req.params.id;
     const order = await Order.findById(orderId)
-      .populate("user", "name email") // only name and email from User
+      .populate("user", "name email phoneNumber") // only name and email from User
       .populate("shippingAddress") // entire Address
       .populate({
         path: "items.product", // nested populate

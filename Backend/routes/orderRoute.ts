@@ -7,6 +7,8 @@ import { createOrUpdateOrder, createPaymentWithRazorpay, getOrderById, getOrderO
 const router = Router();
 
 router.post("/create-order", authenticateUser,createOrUpdateOrder);
+router.patch("/create-order/:id", authenticateUser, createOrUpdateOrder);
+
 router.get("/user-order", authenticateUser,getOrderOfLoggedInUser);
 router.get("/user-order/:id", authenticateUser,getOrderById);
 router.post("/payment-razorpay",authenticateUser,createPaymentWithRazorpay)

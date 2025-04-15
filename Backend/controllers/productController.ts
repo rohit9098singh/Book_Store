@@ -83,7 +83,6 @@ export const getAllProducts = async (req: Request, res: Response) => {
     const products = await Product.find({})
     .sort({ createdAt: -1 })
     .populate("seller", "name email");
-    console.log("look for this",products)
   return response(res, 200, "Product Fetched Successfully", products);
   } catch (error: any) {
     return response(res, 500, "Internal server error", error.message);

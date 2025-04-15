@@ -32,9 +32,11 @@ import {
   useRemoveFromWishlistMutation
 } from '@/store/api';
 import {
+  clearCart,
   setCart
 } from '@/store/slice/cartSlice';
 import {
+  resetCheckout,
   setCheckoutSteps,
   setOrderId
 } from '@/store/slice/checkoutSlice';
@@ -49,7 +51,14 @@ import { RootState } from '@/store/store';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CheckoutAddress from '@/app/component/CheckOutCartItem/componets/CheckoutAddress';
+import BookLoader from '@/lib/BookLoader';
+import Script from 'next/script';
 
+declare global {
+  interface Window {
+    Razorpay: any
+  }
+}
 
 const page = () => {
   const router = useRouter();
@@ -69,7 +78,8 @@ const page = () => {
   const [createRazorpayPayment] = useCreateRazorpayPaymentMutation();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
-
+  console.log("lets see the order data",orderData)
+  
   useEffect(() => {
     if (orderData && orderData.data && orderData.data.length > 0) {
       setSelectedAddress(orderData.data[0].shippingAddress);
@@ -93,6 +103,7 @@ const page = () => {
       const result = await removeFromCart(productId).unwrap();
       if (result.success && result.data) {
         dispatch(setCart(result.data));
+        // dispatch(resetCheckout())
         toast.success(result.message || "items removed successfully");
       }
     } catch (error) {
@@ -149,25 +160,20 @@ const page = () => {
   const finalAmount = totalAmount + maximumShippingCharge
 
   const handleProceedToCheckout = async () => {
-    console.log("yah aaya",cart.items)
-
     try {
       if (steps === "cart") {
-        console.log("aage gya")
-
         //Jab tu cart step pe hota hai, order abhi tak server pe exist nahi karta.
         //Toh wo yaha pe createOrUpdateOrder() ko call karta hai first time:
         // Isse ek naya order create hota hai (server me).
         const result = await createOrUpdateOrder({
           orderData: {
-            items: cart.items,
-            totalAmount: totalAmount,
-            
+            // items: cart.items,
+            totalAmount: finalAmount,
+
           }
         }).unwrap();
-        console.log("try ke andar aaya ke nhi vo")
-        console.log("check the result",result.success)
-        
+        console.log("check the result", result.success)
+
         if (result.success) {
           toast.success("Order created successfully");
           dispatch(setOrderId(result.data._id));
@@ -205,7 +211,7 @@ const page = () => {
           orderData: {
             shippingAddress: address,
             status: "processing"
-          }
+          },
         }).unwrap();
 
         toast.success("Address updated successfully");
@@ -216,9 +222,87 @@ const page = () => {
     }
   };
 
-  const handlepayment = () => {
-    // Payment handler logic here
+  const handlepayment = async () => {
+    if (!orderId) {
+      toast.error("No order found for this user. Please try again later.");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const { data, error } = await createRazorpayPayment(orderId);
+      console.log("Payment data:", data);
+
+      if (error) {
+        throw new Error("Failed to create Razorpay order.");
+      }
+
+      const razorpayOrder = data.data.order;
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
+        amount: razorpayOrder.amount,
+        currency: razorpayOrder.currency,
+        name: "Book Kart",
+        description: "Book purchase",
+        order_id: razorpayOrder.id, 
+
+        handler: async function (response: any) {
+          console.log("Razorpay payment success:", response);
+
+          try {
+            const result = await createOrUpdateOrder({
+              orderId,
+              orderData: {
+                paymentDetails: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+                status: "paid" 
+              }
+            }).unwrap();
+
+            console.log("Update order result:", result);
+
+            if (result.success) {
+              dispatch(clearCart());
+              dispatch(resetCheckout());
+              toast.success("Payment successful!");
+              router.push(`/checkout/payment-success?orderId=${orderId}`);
+            } else {
+              throw new Error(result.message || "Failed to update order.");
+            }
+
+          } catch (apiError) {
+            console.error("Failed to update order:", apiError);
+            toast.error("Payment successful, but failed to update order.");
+          }
+        },
+
+        prefill: {
+          name: orderData?.user?.name,
+          email: orderData?.user?.email,
+          contact: orderData?.user?.phoneNumber,
+        },
+
+        theme: {
+          color: "#3399cc",
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+    } catch (error) {
+      console.error("Payment init failed:", error);
+      toast.error("Failed to initiate payment. Please try again later.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
 
   if (!user) {
     return (
@@ -244,132 +328,142 @@ const page = () => {
     );
   }
 
+  if (isCartLoading || isOrderLoading) {
+    <BookLoader />
+  }
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-gray-100 py-5 px-8 shadow-sm mb-10">
-        <div className="max-w-4xl mx-auto flex items-center space-x-3">
-          <ShoppingCart className="h-7 w-7 text-orange-500" />
-          <span className="text-xl font-semibold text-gray-800">
-            Your cart has {cart.items.length} {cart.items.length === 1 ? "item" : "items"}
-          </span>
-        </div>
-      </div>
-
-      {/* Step Indicator */}
-      <div className="mx-auto px-4 max-w-6xl">
-        <div className="mb-8 py-6 px-4 rounded-lg">
-          <div className="flex justify-center items-center gap-6">
-            {/* Cart Step */}
-            <div className="flex items-center gap-2">
-              <div className={`rounded-full p-3 transition duration-200 ${steps === "cart" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
-                <ShoppingCart className="h-6 w-6 cursor-pointer" />
-              </div>
-              <span className="font-medium text-gray-800 hidden md:block">Cart</span>
-            </div>
-
-            <ChevronRight className="h-5 w-5 text-gray-400" />
-
-            {/* Address Step */}
-            <div className="flex items-center gap-2">
-              <div className={`rounded-full p-3 transition duration-200 ${steps === "address" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
-                <MapPin className="h-6 w-6 cursor-pointer" />
-              </div>
-              <span className="font-medium text-gray-800 hidden md:block">Address</span>
-            </div>
-
-            <ChevronRight className="h-5 w-5 text-gray-400" />
-
-            {/* Payment Step */}
-            <div className="flex items-center gap-2">
-              <div className={`rounded-full p-3 transition duration-200 ${steps === "payment" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
-                <CreditCard className="h-6 w-6 cursor-pointer" />
-              </div>
-              <span className="font-medium text-gray-800 hidden md:block">Payment</span>
-            </div>
+    <>
+      <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+      />
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <div className="bg-gray-100 py-5 px-8 shadow-sm mb-10">
+          <div className="max-w-4xl mx-auto flex items-center space-x-3">
+            <ShoppingCart className="h-7 w-7 text-orange-500" />
+            <span className="text-xl font-semibold text-gray-800">
+              Your cart has {cart.items.length} {cart.items.length === 1 ? "item" : "items"}
+            </span>
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Order Summary */}
-          <div>
-            <Card className="shadow-lg ">
-              <CardHeader>
-                <CardTitle className="text-2xl">Order Summary</CardTitle>
-                <CardDescription>Review Your Items</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CheckOutCartItem
-                  items={cart.items}
-                  onRemoveItem={handleRemoveItems}
-                  onToggleWishlist={handleAddToWhistlist}
-                  wishlist={wishList}
-                />
-              </CardContent>
-            </Card>
+        {/* Step Indicator */}
+        <div className="mx-auto px-4 max-w-6xl">
+          <div className="mb-8 py-6 px-4 rounded-lg">
+            <div className="flex justify-center items-center gap-6">
+              {/* Cart Step */}
+              <div className="flex items-center gap-2">
+                <div className={`rounded-full p-3 transition duration-200 ${steps === "cart" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
+                  <ShoppingCart className="h-6 w-6 cursor-pointer" />
+                </div>
+                <span className="font-medium text-gray-800 hidden md:block">Cart</span>
+              </div>
+
+              <ChevronRight className="h-5 w-5 text-gray-400" />
+
+              {/* Address Step */}
+              <div className="flex items-center gap-2">
+                <div className={`rounded-full p-3 transition duration-200 ${steps === "address" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
+                  <MapPin className="h-6 w-6 cursor-pointer" />
+                </div>
+                <span className="font-medium text-gray-800 hidden md:block">Address</span>
+              </div>
+
+              <ChevronRight className="h-5 w-5 text-gray-400" />
+
+              {/* Payment Step */}
+              <div className="flex items-center gap-2">
+                <div className={`rounded-full p-3 transition duration-200 ${steps === "payment" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}>
+                  <CreditCard className="h-6 w-6 cursor-pointer" />
+                </div>
+                <span className="font-medium text-gray-800 hidden md:block">Payment</span>
+              </div>
+            </div>
           </div>
 
-          {/* Price Details */}
-          <div>
-            <PriceDetails
-              totalOriginalAmount={totalOriginalAmount}
-              totalAmount={finalAmount}
-              totalDiscount={totalDiscount}
-              itemCount={cart.items.length}
-              isProcessing={isProcessing}
-              shippingCharge={maximumShippingCharge}
-              steps={steps}
-              onProceed={handleProceedToCheckout}
-              onBack={() =>
-                dispatch(setCheckoutSteps(steps === "address" ? "cart" : "address"))
+          <div className="grid gap-8 lg:grid-cols-2">
+            {/* Order Summary */}
+            <div>
+              <Card className="shadow-lg ">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Order Summary</CardTitle>
+                  <CardDescription>Review Your Items</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CheckOutCartItem
+                    items={cart.items}
+                    onRemoveItem={handleRemoveItems}
+                    onToggleWishlist={handleAddToWhistlist}
+                    wishlist={wishList}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Price Details */}
+            <div>
+              <PriceDetails
+                totalOriginalAmount={totalOriginalAmount}
+                totalAmount={finalAmount}
+                totalDiscount={totalDiscount}
+                itemCount={cart.items.length}
+                isProcessing={isProcessing}
+                shippingCharge={maximumShippingCharge}
+                steps={steps}
+                onProceed={handleProceedToCheckout}
+                onBack={() =>
+                  dispatch(setCheckoutSteps(steps === "address" ? "cart" : "address"))
+                }
+              />
+              {
+                selectedAddress && (
+                  <Card className='mt-6 mb-6 shadow-lg'>
+                    <CardHeader>
+                      <CardTitle className='text-xl'>
+                        Delivary Address
+                      </CardTitle>
+                      <CardDescription>{" "}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='space-y-1'>
+                        <p>{selectedAddress?.state}</p>
+                        <p>{selectedAddress?.addressLine2 && (
+                          selectedAddress.addressLine2
+                        )}</p>
+                        <p>{selectedAddress.city},{selectedAddress.state}{" "}{selectedAddress.pincode}</p>
+                        <p>Phone:{selectedAddress.phoneNumber}</p>
+                      </div>
+                      <Button onClick={() => setShowAddressDialogue(true)} variant={"outline"}>
+                        <MapPin className='h-4 w-4 mr-2' /> Change Address
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )
               }
-            />
-            {
-              selectedAddress && (
-                <Card className='mt-6 mb-6 shadow-lg'>
-                  <CardHeader>
-                    <CardTitle className='text-xl'>
-                      Delivary Address
-                    </CardTitle>
-                    <CardDescription>{" "}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='space-y-1'>
-                      <p>{selectedAddress?.state}</p>
-                      <p>{selectedAddress?.addressLine2 && (
-                        selectedAddress.addressLine2
-                      )}</p>
-                      <p>{selectedAddress.city},{selectedAddress.state}{" "}{selectedAddress.pincode}</p>
-                      <p>Phone:{selectedAddress.phoneNumber}</p>
-                    </div>
-                    <Button onClick={() => setShowAddressDialogue(true)} variant={"outline"}>
-                      <MapPin className='h-4 w-4 mr-2' /> Change Address
-                    </Button>
-                  </CardContent>
-                </Card>
-              )
-            }
+            </div>
           </div>
-        </div>
-        <Dialog open={showAddressDialogue} onOpenChange={setShowAddressDialogue}>
-          <DialogContent className='sm:max-w-[600px] '>
-            <DialogHeader>
-              <DialogTitle>
-                Select Or Add Delivary Address
-              </DialogTitle>
-              <DialogDescription>
-                {""}
-              </DialogDescription>
-            </DialogHeader>
-            <CheckoutAddress
-              onAddressSelect={handleSelectAddress}
-              selectedAddressId={selectedAddress?._id || ""}
-            />
+          <Dialog open={showAddressDialogue} onOpenChange={setShowAddressDialogue}>
+            <DialogContent className='sm:max-w-[600px] '>
+              <DialogHeader>
+                <DialogTitle>
+                  Select Or Add Delivary Address
+                </DialogTitle>
+                <DialogDescription>
+                  {""}
+                </DialogDescription>
+              </DialogHeader>
+              <CheckoutAddress
+                onAddressSelect={handleSelectAddress}
+                selectedAddressId={selectedAddress?._id || ""}
+              />
 
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-    </div>
+    </>
 
   );
 };
