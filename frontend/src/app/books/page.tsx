@@ -1,7 +1,7 @@
 "use client"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
-import {  filters } from '@/lib/constants';
+import { filters } from '@/lib/constants';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import { formatDistanceToNow } from "date-fns"
@@ -15,8 +15,14 @@ import Pagination from '../component/Pagination/Pagination';
 // import { Heart } from 'lucide-react';
 import NoData from '../component/NoData/NoData';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useGetAllProductsQuery } from '@/store/api';
+import { useAddToWishListMutation, useGetAllProductsQuery, useRemoveFromWishlistMutation } from '@/store/api';
 import { BookDetails } from '@/lib/types/type';
+import { Heart } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToWishListAction, removeFromWishListAction } from '@/store/slice/wishlistSlice';
+import toast from 'react-hot-toast';
+import { RootState } from '@/store/store';
+import { Button } from '@/components/ui/button';
 
 const page = () => {
     const [currentpage, setCurrentPage] = useState(1);
@@ -24,19 +30,24 @@ const page = () => {
     const [selectedType, setSelectedType] = useState<string[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
     const [sortOption, setSortOption] = useState("newest");
-    const [books,setBooks]=useState<BookDetails[]>([])
-    const {data:apiResponse={},isLoading}=useGetAllProductsQuery({});
-    const router=useRouter()
+    const [books, setBooks] = useState<BookDetails[]>([])
+    const { data: apiResponse = {}, isLoading } = useGetAllProductsQuery({});
+    const router = useRouter();
+    const dispatch = useDispatch()
+    const [addToWishList] = useAddToWishListMutation();
+    const [removeFromWishlist] = useRemoveFromWishlistMutation();
     const bookPerPages = 6;
 
-    const searchTerms=new URLSearchParams(window.location.search).get("search") || "";
+    const wishList = useSelector((state: RootState) => state.wishlist.items)
 
-   
-     useEffect(()=>{
-         if(apiResponse.success){
+    const searchTerms = new URLSearchParams(window.location.search).get("search") || "";
+
+
+    useEffect(() => {
+        if (apiResponse.success) {
             setBooks(apiResponse.data)
-         }
-     },[apiResponse])
+        }
+    }, [apiResponse])
 
     const toggleFilter = (section: string, item: string) => {
         const updateFilter = (prev: string[]) => {
@@ -70,16 +81,16 @@ const page = () => {
             selectedCondition.map(condition => condition.toLowerCase()).includes(book.condition.toLowerCase());
 
         const typeMatch = selectedType.length === 0 ||
-        selectedType.map(type => type.toLowerCase()).includes(book.classType.toLowerCase());
+            selectedType.map(type => type.toLowerCase()).includes(book.classType.toLowerCase());
 
         const categoryMatch = selectedCategory.length === 0 ||
             selectedCategory.map(category => category.toLowerCase()).includes(book.category.toLowerCase());
 
-            const searchMatch = searchTerms ? 
+        const searchMatch = searchTerms ?
             book.title.toLowerCase().includes(searchTerms.toLowerCase().trim()) ||
             book.author.toLowerCase().includes(searchTerms.toLowerCase().trim()) ||
             (typeof book.category === 'string' && book.category.toLowerCase().includes(searchTerms.toLowerCase().trim())) ||
-            book.subject.toLowerCase().includes(searchTerms.toLowerCase().trim()) 
+            book.subject.toLowerCase().includes(searchTerms.toLowerCase().trim())
             : true;
 
 
@@ -106,7 +117,7 @@ const page = () => {
     const totalPages = Math.ceil(sortedBooks.length / bookPerPages);
 
     const paginatedBooks = sortedBooks.slice((currentpage - 1) * bookPerPages, currentpage * bookPerPages);
-    console.log("this is the paginated book",paginatedBooks)
+    console.log("this is the paginated book", paginatedBooks)
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page)
@@ -122,6 +133,33 @@ const page = () => {
         const date = new Date(dateString)
         return formatDistanceToNow(date, { addSuffix: true })
     }
+    const handleAddToWhistlist = async (productId: string) => {
+        try {
+            const isWishList = wishList.some((item: any) => item.products.includes(productId))
+            console.log("it is tru or false", isWishList)
+            if (isWishList) {
+                const result = await removeFromWishlist(productId).unwrap();
+                if (result.success) {
+                    dispatch(removeFromWishListAction(productId));
+                    toast.success(result.message || "product removed from the wishlist")
+                }
+                else {
+                    throw new Error(result.message || "failed to remove from the wishlist")
+                }
+            } else {
+                const result = await addToWishList(productId).unwrap();
+                if (result.success) {
+                    dispatch(addToWishListAction(result.data));
+                    toast.success(result.message || "Added to wishlist");
+                } else {
+                    throw new Error(result.message || "Failed to add to wishlist")
+                }
+            }
+        } catch (error: any) {
+            const errorMessage = error?.data?.message;
+            toast.error(errorMessage || "failed to add or remove to wishlist");
+        }
+    };
 
     return (
 
@@ -140,34 +178,34 @@ const page = () => {
                         {
                             paginatedBooks.length ? (
 
-                        <Accordion type="multiple" className="bg-white p-6 border rounded-lg shadow-sm">
-                            {Object.entries(filters).map(([key, values]) => (
-                                <AccordionItem key={key} value={key}>
-                                    <AccordionTrigger className="text-lg font-semibold text-blue-500">
-                                        {key.charAt(0).toUpperCase() + key.slice(1)}
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        {values.map((value) => (
-                                            <div key={value} className="flex items-center space-x-2 py-1 cursor-pointer">
-                                                <Checkbox
-                                                    id={value}
-                                                    checked={
-                                                        key === "condition" ? selectedCondition.includes(value) :
-                                                            key === "classType" ? selectedType.includes(value) :
-                                                                selectedCategory.includes(value)
-                                                    }
-                                                    onCheckedChange={() => toggleFilter(key, value)}
-                                                />
-                                                <label htmlFor={value} className="text-sm font-medium text-gray-700">
-                                                    {value}
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                            ):(
+                                <Accordion type="multiple" className="bg-white p-6 border rounded-lg shadow-sm">
+                                    {Object.entries(filters).map(([key, values]) => (
+                                        <AccordionItem key={key} value={key}>
+                                            <AccordionTrigger className="text-lg font-semibold text-blue-500">
+                                                {key.charAt(0).toUpperCase() + key.slice(1)}
+                                            </AccordionTrigger>
+                                            <AccordionContent>
+                                                {values.map((value) => (
+                                                    <div key={value} className="flex items-center space-x-2 py-1 cursor-pointer">
+                                                        <Checkbox
+                                                            id={value}
+                                                            checked={
+                                                                key === "condition" ? selectedCondition.includes(value) :
+                                                                    key === "classType" ? selectedType.includes(value) :
+                                                                        selectedCategory.includes(value)
+                                                            }
+                                                            onCheckedChange={() => toggleFilter(key, value)}
+                                                        />
+                                                        <label htmlFor={value} className="text-sm font-medium text-gray-700">
+                                                            {value}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            ) : (
                                 <></>
                             )
                         }
@@ -222,11 +260,13 @@ const page = () => {
                                                                     {calculateDiscount(book.price, book.finalPrice)}% OFF
                                                                 </Badge>
                                                             )}
-                                                            {/* <button
+                                                            <button
                                                                 className="absolute right-2 top-2 rounded-full bg-white/80 cursor-pointer p-2 transition-all duration-300 hover:bg-white shadow-lg hover:shadow-xl active:scale-100"
                                                             >
-                                                                <Heart size={20} className="text-red-500 transition-transform duration-200 hover:scale-110" />
-                                                            </button> */}
+                                                                <Heart
+                                                                    onClick={() => handleAddToWhistlist(book._id)}
+                                                                    size={20} className="text-red-500 transition-transform duration-200 hover:scale-110" />
+                                                            </button>
                                                         </div>
 
                                                         <div className="mt-3">

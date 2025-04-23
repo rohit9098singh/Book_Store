@@ -72,6 +72,8 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
     res.cookie("access_token", accessToken, {
       httpOnly: true,
+      sameSite:"none",
+      secure:true,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -105,6 +107,8 @@ export const login = async (req: Request, res: Response) => {
     const accessToken = generateToken(user);
     res.cookie("access_token", accessToken, {
       httpOnly: true,
+      sameSite:"none",
+      secure:true,
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -183,8 +187,8 @@ export const logout = async (req: Request, res: Response) => {
 
     res.clearCookie("access_token", {
         httpOnly: true,
-        secure: false, // ✅ same as in login
-        sameSite: "lax",
+        sameSite:"none",
+        secure:true,
       });
     res.cookie("auth_token", "", {
       httpOnly: true,

@@ -136,6 +136,7 @@ export const getOrderOfLoggedInUser = async (req: Request, res: Response) => {
 
     const orders = await Order.find({ user: userId })
       .sort({ createdAt: -1 })
+      .populate("shippingAddress")
       .populate({
         path: "items.product",
         model: "Product",

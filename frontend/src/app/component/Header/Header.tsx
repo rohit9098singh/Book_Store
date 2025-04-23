@@ -31,10 +31,13 @@ const Header = () => {
 
   const [logoutApi] = useLogoutApiMutation();
 
+
   const userPlaceholder: string = user?.name
     .split(" ")
     .map((word: string): string => word[0])
     .join("").toUpperCase();
+
+    console.log("up is ",userPlaceholder)
 
   const cartItemCount = useSelector((state: RootState) => state.cart.items.length)
 
@@ -77,7 +80,7 @@ const Header = () => {
   const menuItems = [
     { id: "1", icon: <User className="h-5 w-5" />, label: "My Profile", path: "/account/profile" },
     { id: "2", icon: <Package className="h-5 w-5" />, label: "My Orders", path: "/account/orders" },
-    { id: "3", icon: <PiggyBank className="h-5 w-5" />, label: "Selling Orders", path: "/account/sellings-products" },
+    { id: "3", icon: <PiggyBank className="h-5 w-5" />, label: "Selling Orders", path: "/account/selling-products" },
     { id: "4", icon: <ShoppingCart className="h-5 w-5" />, label: "Cart", path: "/checkout/cart" },
     { id: "5", icon: <Heart className="h-5 w-5" />, label: "Wishlist", path: "/account/wishlist" },
     { id: "7", icon: <Info className="h-5 w-5" />, label: "About Us", path: "/about-us" },

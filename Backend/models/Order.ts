@@ -19,7 +19,7 @@ export interface IOrder extends Document{
         razorpay_payment_id?:string;
         razorpay_signature?:string;
     }
-    status:string;
+    status:"processing"|"shipped"|"delivered"|"cancelled";
 }
 
 
