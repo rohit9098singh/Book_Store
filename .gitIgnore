@@ -1,0 +1,6 @@
+Backend/node_modules
+frontend/node_modules
+
+#ignore env
+Backend/.env
+frontend/.env
