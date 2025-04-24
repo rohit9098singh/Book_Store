@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const cloudnaryConfig_1 = require("../config/cloudnaryConfig");
+const productController_1 = require("../controllers/productController");
+const router = (0, express_1.Router)();
+router.post("/create-product", authMiddleware_1.authenticateUser, cloudnaryConfig_1.multerMiddleware, productController_1.createProduct);
+router.get("/get-all-product", authMiddleware_1.authenticateUser, productController_1.getAllProducts);
+router.get("/get-product-by-Id/:id", authMiddleware_1.authenticateUser, productController_1.getProductById);
+router.delete("/delete-product/:productId", authMiddleware_1.authenticateUser, productController_1.deleteProduct);
+router.get("/get-product-by-sellerId/:sellerId", authMiddleware_1.authenticateUser, productController_1.getProductBySellerId);
+exports.default = router;

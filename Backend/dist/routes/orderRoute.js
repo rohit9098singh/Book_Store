@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const orderController_1 = require("../controllers/orderController");
+const router = (0, express_1.Router)();
+router.post("/create-order", authMiddleware_1.authenticateUser, orderController_1.createOrUpdateOrder);
+router.patch("/create-order/:id", authMiddleware_1.authenticateUser, orderController_1.createOrUpdateOrder);
+router.get("/user-order", authMiddleware_1.authenticateUser, orderController_1.getOrderOfLoggedInUser);
+router.get("/user-order/:id", authMiddleware_1.authenticateUser, orderController_1.getOrderById);
+router.post("/payment-razorpay", authMiddleware_1.authenticateUser, orderController_1.createPaymentWithRazorpay);
+router.post("/razorpay-webhook", authMiddleware_1.authenticateUser, orderController_1.handleRazorPayWebhook);
+exports.default = router;

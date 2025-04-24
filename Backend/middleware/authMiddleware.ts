@@ -6,6 +6,7 @@ declare global {
     namespace Express {
       interface Request {
         id: string;
+        role:string
       }
     }
   }
@@ -30,9 +31,10 @@ declare global {
       }
   
       req.id = decoded.userId;
+      req.role=decoded.role;
       next();
     } catch (error) {
-      return response(res, 400, "Not authorized, token not valid or expired");
+      return response(res, 400, "Not authorized, token no t valid or expired");
     }
   };
   
