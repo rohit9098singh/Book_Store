@@ -78,8 +78,14 @@ const page = () => {
   const [createRazorpayPayment] = useCreateRazorpayPaymentMutation();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
-  console.log("lets see the order data",orderData)
-  
+  console.log("lets see the order data", orderData)
+
+
+  useEffect(() => {
+    if (user && user.role !== "user") {
+      router.push("/admin")
+    }
+  }, [user, router])
   useEffect(() => {
     if (orderData && orderData.data && orderData.data.length > 0) {
       setSelectedAddress(orderData.data[0].shippingAddress);
@@ -246,7 +252,7 @@ const page = () => {
         currency: razorpayOrder.currency,
         name: "Book Kart",
         description: "Book purchase",
-        order_id: razorpayOrder.id, 
+        order_id: razorpayOrder.id,
 
         handler: async function (response: any) {
           console.log("Razorpay payment success:", response);
@@ -260,7 +266,7 @@ const page = () => {
                   razorpay_payment_id: response.razorpay_payment_id,
                   razorpay_signature: response.razorpay_signature,
                 },
-                status: "paid" 
+                status: "paid"
               }
             }).unwrap();
 

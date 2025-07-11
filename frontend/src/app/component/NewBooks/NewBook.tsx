@@ -4,16 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookDetails } from "@/lib/types/type";
 import { useGetAllProductsQuery } from "@/store/api";
+import { toggleLoginDialogue } from "@/store/slice/userSlice";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 const NewBook = () => {
     const [currentBookSlide, setCurrentBookSlide] = useState(0);
-    const { data: apiResponse = {}, isLoading } = useGetAllProductsQuery({});
-
     const [books, setBooks] = useState<BookDetails[]>([])
+
+
+    const { data: apiResponse = {}, isLoading } = useGetAllProductsQuery({});
+    const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+    const dispatch = useDispatch()
+
+
+    const handleLoginCLick = () => {
+        dispatch(toggleLoginDialogue());
+    }
 
     useEffect(() => {
         if (apiResponse.success) {
@@ -89,11 +100,21 @@ const NewBook = () => {
                                                     </span>
                                                 )}
                                                 <div className="w-full">
-                                                    <Link href={`books/${book._id}`}>
-                                                        <Button className="mt-4 w-full bg-amber-400 cursor-pointer hover:bg-amber-500 text-white font-semibold py-2 rounded-lg">
+                                                    {isLoggedIn ? (
+                                                        <Link href={`books/${book._id}`}>
+                                                            <Button className="mt-4 w-full bg-amber-400 cursor-pointer hover:bg-amber-500 text-white font-semibold py-2 rounded-lg">
+                                                                Buy Now
+                                                            </Button>
+                                                        </Link>
+                                                    ) : (
+                                                        <Button
+                                                            onClick={handleLoginCLick}
+                                                            className="mt-4 w-full bg-amber-400 cursor-pointer hover:bg-amber-500 text-white font-semibold py-2 rounded-lg"
+                                                        >
                                                             Buy Now
                                                         </Button>
-                                                    </Link>
+                                                    )}
+
                                                 </div>
                                             </CardContent>
                                         </Card>

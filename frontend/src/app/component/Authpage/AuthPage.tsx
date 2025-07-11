@@ -265,14 +265,14 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                         </div>
                                         {signUpError.agreeTerms && <p className='text-red-500 text-sm'>{signUpError.agreeTerms.message}</p>}
 
-                                        <Button type='submit' className='w-full'>
+                                        <Button type='submit' className='w-full  '>
                                             {signLoading ? (
                                                 <>
                                                     <Loader2 className="animate-spin mr-2" size={20} />
                                                     <span>Signing in...</span>
                                                 </>
                                             ) : (
-                                                "Sign in"
+                                                "Sign up"
                                             )}
                                         </Button>
                                     </form>

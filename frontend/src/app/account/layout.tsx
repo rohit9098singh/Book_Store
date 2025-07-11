@@ -3,9 +3,9 @@
 import { useLogoutApiMutation } from '@/store/api'
 import { logout, toggleLoginDialogue } from '@/store/slice/userSlice'
 import { RootState } from '@/store/store'
-import { BookOpen, Heart,  LogOut,  ShoppingCart, User } from 'lucide-react'
+import { BookOpen, Heart, LogOut, ShoppingCart, User } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import React from 'react'
+import React, { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { useDispatch, useSelector } from 'react-redux'
 import NoData from '../component/NoData/NoData'
@@ -43,16 +43,28 @@ const navigation = [
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
-    const user = useSelector((state: RootState) => state.user.user);
-    const dispatch = useDispatch();
+    const user = useSelector((state: RootState) => state?.user?.user);
     const router = useRouter();
+    const dispatch = useDispatch();
     const [logoutApi] = useLogoutApiMutation();
 
+    console.log("checking out the user and its name ", user?.name)
+
     const userPlaceholder: string = user?.name
-        .split(" ")
-        .map((word: string): string => word[0])
-        .join("")
-        .toUpperCase()
+        ? user.name
+            .split(" ")
+            .map((word: string) => word[0])
+            .join("")
+            .toUpperCase()
+        : "👤";
+
+
+
+    // useEffect(() => {
+    //     if (user && user.role !== "user") {
+    //         router.push("/admin")
+    //     }
+    // }, [user, router])
 
     const handleLogout = async () => {
         try {
@@ -91,46 +103,46 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             <span className='text-2xl'>Your Account</span>
                         </Link>
                     </div>
-                   <div className='px-6 py-2'>
-                    <div className='flex items-center gap-4'>
-                       <Avatar className='w-12 h-12 rounded-full'>
-                             {
-                                user?.profilePicture ?(
-                                    <AvatarImage src={user?.profilePicture} alt={"user_image"}></AvatarImage>
-                                ):(
-                                    <AvatarFallback>{userPlaceholder}</AvatarFallback>
-                                )
-                             }
-                        </Avatar>
-                        <div className='space-y-1'>
-                           <p className='text-sm font-medium leading-none text-white'>{user?.name}</p>
-                           <p className='text-xs text-purple-200'>{user?.email}</p>
+                    <div className='px-6 py-2'>
+                        <div className='flex items-center gap-4'>
+                            <Avatar className='w-12 h-12 rounded-full'>
+                                {
+                                    user?.profilePicture ? (
+                                        <AvatarImage src={user?.profilePicture} alt={"user_image"}></AvatarImage>
+                                    ) : (
+                                        <AvatarFallback>{userPlaceholder}</AvatarFallback>
+                                    )
+                                }
+                            </Avatar>
+                            <div className='space-y-1'>
+                                <p className='text-sm font-medium leading-none text-white'>{user?.name}</p>
+                                <p className='text-xs text-purple-200'>{user?.email}</p>
+                            </div>
                         </div>
                     </div>
-                   </div>
-                   <Separator className='bg-purple-400'/>
-                   <div className='space-4-1 px-2'>
-                          <div className='grid items-start px-2 py-2 text-sm font-medium'>
-                             {
-                                navigation.map((item)=>{
-                                    const Icon=item.icon;
-                                    const isActive=pathname=== item.href;
-                                    return(
-                                      <Link key={item.href} href={item.href} className={`flex font-semibold items-center gap-3 rounded-lg px-3 py-3 mb-2 transition-all ${isActive? `bg-gradient-to-r ${item.color} text-white`:"text-purple-100 hover:bg-purple-600"}`}>
-                                        <Icon className='h-4 w-4'/>
-                                        {item.title}
-                                      </Link>
+                    <Separator className='bg-purple-400' />
+                    <div className='space-4-1 px-2'>
+                        <div className='grid items-start px-2 py-2 text-sm font-medium'>
+                            {
+                                navigation.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link key={item.href} href={item.href} className={`flex font-semibold items-center gap-3 rounded-lg px-3 py-3 mb-2 transition-all ${isActive ? `bg-gradient-to-r ${item.color} text-white` : "text-purple-100 hover:bg-purple-600"}`}>
+                                            <Icon className='h-4 w-4' />
+                                            {item.title}
+                                        </Link>
                                     )
                                 })
-                             }
-                        </div> 
-                   </div>
-                <div className='mt-auto flex p-4 '>
-                    <Button variant={"secondary"} className='w-full justify-start cursor-pointer' onClick={handleLogout}>
-                       <LogOut className='h-4 w-4'/>
-                       Logout
-                    </Button>
-                </div>
+                            }
+                        </div>
+                    </div>
+                    <div className='mt-auto flex p-4 '>
+                        <Button variant={"secondary"} className='w-full justify-start cursor-pointer' onClick={handleLogout}>
+                            <LogOut className='h-4 w-4' />
+                            Logout
+                        </Button>
+                    </div>
                 </div>
             </div>
             <div className='p-4'>

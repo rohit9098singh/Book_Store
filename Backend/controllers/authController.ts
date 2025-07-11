@@ -146,7 +146,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     console.log(error);
     return response(res, 500, "Internal server error", error.message);
   }
-};
+};   
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {

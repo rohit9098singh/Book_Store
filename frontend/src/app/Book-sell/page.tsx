@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -51,6 +51,12 @@ const Page = () => {
       category: ""
     },
   });
+
+  //  useEffect(() => {
+  //         if (user && user.role !== "user") {
+  //             router.push("/admin")
+  //         }
+  //     }, [user, router])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

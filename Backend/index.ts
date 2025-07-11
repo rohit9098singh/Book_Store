@@ -10,6 +10,7 @@ import wishlistRoute from "./routes/wishListRoute"
 import addressRoute from "./routes/addressRoute"
 import userRoute from "./routes/userRoute"
 import orderRoute from "./routes/orderRoute"
+import adminRoute from "./routes/adminRoute"
 import passport from "./controllers/strategy/googleStrategy"
 
 dotenv.config();
@@ -36,6 +37,8 @@ app.use("/api/wishlist",wishlistRoute);
 app.use("/api/user/address",addressRoute);
 app.use("/api/user",userRoute);
 app.use("/api/order",orderRoute);
+
+app.use("/api/admin",adminRoute)
 
 const startServer = async () => {
     try {

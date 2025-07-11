@@ -41,7 +41,15 @@ const page = () => {
     const wishList = useSelector((state: RootState) => state.wishlist.items)
 
     const searchTerms = new URLSearchParams(window.location.search).get("search") || "";
+    
+    const user = useSelector((state: RootState) => state.user.user);
 
+
+    // useEffect(() => {
+    //     if (user && user.role !== "user") {
+    //         router.push("/admin")
+    //     }
+    // }, [user, router])
 
     useEffect(() => {
         if (apiResponse.success) {

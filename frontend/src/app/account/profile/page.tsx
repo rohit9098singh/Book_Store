@@ -18,34 +18,32 @@ const Page = () => {
   const [isEditing, setIsEditing] = useState(false);
   const user = useSelector((state: RootState) => state?.user?.user);
   const [updateUser, { isLoading }] = useUpdateUserMutation();
-  console.log("at here",user)
   const dispatch = useDispatch();
-  const { register, handleSubmit, reset } = useForm<userData>({
-    defaultValues: {
-      name: user?.name || "",
-      email: user?.email || "",
-      phoneNumber: user?.phoneNumber || "",
-    }
-  });
+
+  const { register, handleSubmit, reset } = useForm<userData>();
 
   useEffect(() => {
-    reset({
-      name: user?.name || "",
-      email: user?.email || "",
-      phoneNumber: user?.phoneNumber || "",
-    });
-  }, [user, isEditing, reset]);
+    if (user) {
+      reset({
+        name: user.name || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+      });
+    }
+  }, [user, reset]);
 
   const handleProfileEdit = async (data: userData) => {
     const { name, phoneNumber } = data;
     try {
       const result = await updateUser({
         userId: user?._id,
-        userData: { name, phoneNumber }
+        userData: { name, phoneNumber },
       });
 
-      if (result  && result.data) {
-        dispatch(setUser(result.data));
+      if (result && result.data) {
+        // If your API returns { success: true, data: { name, phoneNumber, ... } }
+        const updatedUser = result.data.data || result.data;
+        dispatch(setUser(updatedUser));
         setIsEditing(false);
         toast.success("User updated successfully");
       } else {
@@ -73,13 +71,14 @@ const Page = () => {
         <CardContent className='space-y-4 pt-6'>
           <form onSubmit={handleSubmit(handleProfileEdit)}>
             <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              {/* Username */}
               <div className='space-y-2'>
                 <Label htmlFor='username'>Username</Label>
                 <div className='relative'>
                   <User className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400' />
                   <Input
                     id='username'
-                    placeholder='john'
+                    placeholder='Enter your name'
                     disabled={!isEditing}
                     className='pl-10'
                     {...register("name")}
@@ -87,6 +86,7 @@ const Page = () => {
                 </div>
               </div>
 
+              {/* Email */}
               <div className='space-y-2'>
                 <Label htmlFor='email'>Email</Label>
                 <div className='relative'>
@@ -101,6 +101,7 @@ const Page = () => {
                 </div>
               </div>
 
+              {/* Phone Number */}
               <div className='space-y-2'>
                 <Label htmlFor='phoneNumber'>Phone Number</Label>
                 <div className='relative'>

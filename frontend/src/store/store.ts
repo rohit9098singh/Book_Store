@@ -7,6 +7,7 @@ import cartReducer from "./slice/cartSlice"
 import wishlistReducer from "./slice/wishlistSlice"
 import checkoutReducer from "./slice/checkoutSlice"
 import { api } from "./api"; //  Ensure `api` is imported!
+import { adminApi } from "./adminApi";
 
 // 🔥 Persist Configuration for User
 const userPersistConfig = {
@@ -33,6 +34,7 @@ const persistedCheckoutReducer = persistReducer(checkoutPersistConfig, checkoutR
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer, 
+    [adminApi.reducerPath]:adminApi.reducer,
     user: persistedUserReducer, //  Persisted Reducer Use Ho Raha Hai
     cart:persistedCartReducer,
     wishlist:persistedWishlistReducer,
@@ -44,7 +46,8 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, REGISTER, PURGE], //  Redux Persist Errors Avoid Karega
       },
-    }).concat(api.middleware), 
+    }).concat(api.middleware)
+      .concat(adminApi.middleware)
 });
 
 // Redux-Persist ke liye Store Persist Karo

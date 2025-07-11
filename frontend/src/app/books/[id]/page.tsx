@@ -40,8 +40,14 @@ const Page = () => {
 
     const wishList = useSelector((state: RootState) => state.wishlist.items)
     const user = useSelector((state: RootState) => state.user.user);
-    console.log("take the user", user)
+    const cart = useSelector((state: RootState) => state.cart.items);
 
+
+    // useEffect(() => {
+    //     if (user && user.role !== "user") {
+    //         router.push("/admin")
+    //     }
+    // }, [user, router])
 
     useEffect(() => {
         if (apiResponse.success) {
@@ -70,6 +76,11 @@ const Page = () => {
 
     const handleAddToCart = async () => {
         if (book) {
+            const isAlredyInCart = cart.some(item => item.product._id === book._id);
+            if (isAddToCart) {
+                toast.error("item already in cart")
+                return
+            }
             setIsAddToCart(true);
             try {
                 const result = await addToCart({
@@ -220,6 +231,11 @@ const Page = () => {
                                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                                         <Loader2 className="animate-spin text-blue-500" size={20} />
                                         <span>Adding to Cart ...</span>
+                                    </div>
+                                ) : cart.some(item => item.product._id === book._id) ? (
+                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-not-allowed">
+                                        <ShoppingCart className="text-blue-500" size={24} />
+                                        <span>Already in Cart</span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
