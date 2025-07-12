@@ -21,28 +21,32 @@ transporter.verify((error, success) => {
 
 const sendEmail = async (to: string, subject: string, body: string) => {
     try {
-        await transporter.sendMail({
+        const info = await transporter.sendMail({
             from: `"Your BookKart" <${process.env.EMAIL_USER}>`,
             to,
             subject,
             html: body,
         });
         console.log(`📩 Email sent successfully to ${to}`);
+        return info;
     } catch (error) {
         console.error(`❌ Failed to send email to ${to}:`, error);
+        return null;
     }
 };
 
+
 export const sendVerificationToEmail = async (to: string, token: string) => {
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
-    const html = `
-       <h1>Welcome To Your BookKart! Verify Your Email</h1>
-       <p>Thank you for registering. Please click on the link below to verify your email address:</p>
-       <a href="${verificationUrl}">Verify Email Here</a>
-       <p>If you didn't request this or have already verified, please ignore this email.</p>
-    `;
-    await sendEmail(to, "Please verify your email to access BookKart", html);
+  const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${token}`;
+  const html = `
+     <h1>Welcome To Your BookKart! Verify Your Email</h1>
+     <p>Thank you for registering. Please click on the link below to verify your email address:</p>
+     <a href="${verificationUrl}">Verify Email Here</a>
+     <p>If you didn't request this or have already verified, please ignore this email.</p>
+  `;
+  return await sendEmail(to, "Please verify your email to access BookKart", html); // ✅ return here
 };
+
 
 export const sendResetPasswordLinkToEmail = async (to: string, token: string) => {
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
