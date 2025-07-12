@@ -148,7 +148,7 @@ const userPlaceholder: string = user?.name
                   </Avatar>
                   <div>
                     <span className="font-semibold">{user?.name}</span>
-                    <span className="block text-sm text-gray-500">{user?.email}</span>
+                    <span className="block text-sm text-gray-500 ">{user?.email}</span>
                   </div>
                 </div>
               ) : (
@@ -228,7 +228,7 @@ const userPlaceholder: string = user?.name
                 </Avatar>
                 <div>
                   <span className="font-semibold block">{user?.name}</span>
-                  <span className="text-sm text-gray-500">{user?.email}</span>
+                  <span className="text-sm text-gray-500 flex flex-wrap">{user?.email}</span>
                 </div>
               </div>
             ) : (
