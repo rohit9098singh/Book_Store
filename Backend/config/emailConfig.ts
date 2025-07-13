@@ -30,7 +30,7 @@ const sendEmail = async (to: string, subject: string, body: string) => {
         console.log(`📩 Email sent successfully to ${to}`);
         return info;
     } catch (error) {
-        console.error(`❌ Failed to send email to ${to}:`, error);
+        console.error(` Failed to send email to ${to}:`, error);
         return null;
     }
 };
@@ -48,13 +48,18 @@ export const sendVerificationToEmail = async (to: string, token: string) => {
 };
 
 
-export const sendResetPasswordLinkToEmail = async (to: string, token: string) => {
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
-    const html = `
-       <h1>Welcome To Your BookKart! Reset Your Password</h1>
-       <p>You have requested to reset your password. Click the link below to set a new password:</p>
-       <a href="${resetUrl}">Reset Password Here!</a>
-       <p>If you didn't request this, please ignore this email and your password will remain the same.</p>
-    `;
-    await sendEmail(to, "Please Reset Your Password", html);
+export const sendResetPasswordLinkToEmail = async (
+  to: string,
+  token: string
+) => {
+  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  const html = `
+    <h1>Reset Your Password - BookKart</h1>
+    <p>Click the link below to reset your password:</p>
+    <a href="${resetUrl}">Reset Password</a>
+    <p>This link will expire in 1 hour.</p>
+    <p>If you did not request this, please ignore this email.</p>
+  `;
+
+  return await sendEmail(to, "Reset your BookKart password", html);
 };

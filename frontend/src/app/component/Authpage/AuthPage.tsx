@@ -198,13 +198,13 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                         </Button>
                                     </form>
 
-                                    <div className="flex items-center my-4">
+                                    {/* <div className="flex items-center my-4">
                                         <div className="flex-1 border-t border-gray-300"></div>
                                         <span className="mx-3 text-gray-500 text-sm font-medium">OR</span>
                                         <div className="flex-1 border-t border-gray-300"></div>
-                                    </div>
+                                    </div> */}
 
-                                    {
+                                    {/* {
                                         googleLoading ? (
                                             <div className='w-full flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 p-2 pl-35'>
                                                 <Loader2 className="animate-spin mr-2" size={20} />
@@ -225,7 +225,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                                 Log in with Google
                                             </Button>
                                         )
-                                    }
+                                    } */}
 
 
                                 </TabsContent>
@@ -276,12 +276,12 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                             )}
                                         </Button>
                                     </form>
-                                    <div className="flex items-center my-4">
+                                    {/* <div className="flex items-center my-4">
                                         <div className="flex-1 border-t border-gray-300"></div>
                                         <span className="mx-3 text-gray-500 text-sm font-medium">OR</span>
                                         <div className="flex-1 border-t border-gray-300"></div>
-                                    </div>
-                                    {
+                                    </div> */}
+                                    {/* {
                                         googleLoading ? (
                                             <div className='w-full flex items-center gap-2 cursor-pointer bg-gray-100 hover:bg-gray-200 p-2 pl-35'>
                                                 <Loader2 className="animate-spin mr-2" size={20} />
@@ -302,7 +302,7 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
                                                 Sign in with Google
                                             </Button>
                                         )
-                                    }
+                                    } */}
 
                                 </TabsContent>
 
