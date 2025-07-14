@@ -41,15 +41,9 @@ const page = () => {
     const wishList = useSelector((state: RootState) => state.wishlist.items)
 
     const searchTerms = new URLSearchParams(window.location.search).get("search") || "";
-    
+
     const user = useSelector((state: RootState) => state.user.user);
 
-
-    // useEffect(() => {
-    //     if (user && user.role !== "user") {
-    //         router.push("/admin")
-    //     }
-    // }, [user, router])
 
     useEffect(() => {
         if (apiResponse.success) {
@@ -91,8 +85,10 @@ const page = () => {
         const typeMatch = selectedType.length === 0 ||
             selectedType.map(type => type.toLowerCase()).includes(book.classType.toLowerCase());
 
-        const categoryMatch = selectedCategory.length === 0 ||
-            selectedCategory.map(category => category.toLowerCase()).includes(book.category.toLowerCase());
+        selectedCategory
+            .map((category) => category.toLowerCase())
+            .includes(typeof book.category === "string" ? book.category.toLowerCase() : "");
+
 
         const searchMatch = searchTerms ?
             book.title.toLowerCase().includes(searchTerms.toLowerCase().trim()) ||
@@ -102,7 +98,7 @@ const page = () => {
             : true;
 
 
-        return conditionMatch && typeMatch && categoryMatch && searchMatch;
+        return conditionMatch && typeMatch && selectedCategory && searchMatch;
     });
 
     const sortedBooks = [...filterBooks].sort((a, b) => {

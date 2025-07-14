@@ -7,10 +7,8 @@ import Link from "next/link";
 import NewBook from "./component/NewBooks/NewBook";
 import SellBooks from "./component/Buy_Sell_Steps/SellBooks";
 import BuyBooks from "./component/Buy_Sell_Steps/BuyBooks";
-import BlogPost from "./component/BlogPost/BlogPost";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
-import { useRouter } from "next/navigation";
 
 const Page = () => {
 
@@ -22,14 +20,6 @@ const Page = () => {
 
   const [currentImage, setCurrentImage] = useState(0);
   const user = useSelector((state: RootState) => state?.user?.user);
-
-  const router=useRouter();
-  
-  // useEffect(()=>{
-  //   if(user && user.role !=="user"){
-  //      router.push("/signup")
-  //   }
-  // },[user,router])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -107,7 +97,7 @@ const Page = () => {
       {/**how to buy section */}
         <BuyBooks/>
         {/**blog section at here */}
-        <BlogPost/>
+        {/* <BlogPost/> */}
 
     </div>
   );

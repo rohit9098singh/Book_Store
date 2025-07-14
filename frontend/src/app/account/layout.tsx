@@ -58,14 +58,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             .toUpperCase()
         : "👤";
 
-
-
-    // useEffect(() => {
-    //     if (user && user.role !== "user") {
-    //         router.push("/admin")
-    //     }
-    // }, [user, router])
-
     const handleLogout = async () => {
         try {
             await logoutApi({}).unwrap();

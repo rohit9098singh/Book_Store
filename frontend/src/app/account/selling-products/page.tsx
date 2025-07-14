@@ -66,7 +66,7 @@ const Page = () => {
   }
 
   return (
-    <div className="bg-gradient-to-b from-purple-50 to-white py-8">
+    <div className="bg-gradient-to-b from-purple-50 to-white py-2">
       <div className="mx-auto max-w-6xl px-4">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold text-purple-600 mb-2">Your Listed Books</h1>
@@ -77,7 +77,7 @@ const Page = () => {
           {books.map((product: BookDetails) => (
             <Card
               key={product._id}
-              className="shadow-md hover:shadow-lg transition-shadow duration-300 border border-purple-200"
+              className="rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-purple-200"
             >
               <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4">
                 <CardTitle className="text-lg font-semibold text-purple-700 flex items-center gap-2">
@@ -87,27 +87,30 @@ const Page = () => {
                 <CardDescription>{product.subject}</CardDescription>
               </CardHeader>
 
-              <CardContent className="p-4">
-                <Image
-                  src={
-                    typeof product.images[0] === "string"
-                      ? product.images[0]
-                      : URL.createObjectURL(product.images[0])
-                  }
-                  alt={product.title}
-                  width={100}
-                  height={100}
-                  className="rounded-md object-contain w-60 mb-4"
-                />
-                <div className="space-y-1 text-sm text-gray-600">
-                  <p>Category: {product.category}</p>
-                  <p>Class: {product.classType}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                      ₹{product.finalPrice}
-                    </Badge>
-                    <span className="line-through text-gray-400">₹{product.price}</span>
-                  </div>
+              <CardContent className="p-4 flex flex-col items-center">
+                <div className="relative w-40 h-52 mb-4">
+                  <Image
+                    src={
+                      typeof product.images[0] === "string"
+                        ? product.images[0]
+                        : URL.createObjectURL(product.images[0])
+                    }
+                    alt={product.title}
+                    fill
+                    className="rounded-md object-contain"
+                  />
+                </div>
+
+                <div className="space-y-1 text-sm text-center text-gray-700">
+                  <p><span className="font-medium">Category:</span> {product.category}</p>
+                  <p><span className="font-medium">Class:</span> {product.classType}</p>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800 text-base px-2 py-1">
+                    ₹{product.finalPrice}
+                  </Badge>
+                  <span className="line-through text-gray-400 text-sm">₹{product.price}</span>
                 </div>
               </CardContent>
 
