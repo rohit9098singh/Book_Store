@@ -2,52 +2,58 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const BASE_URl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
+// Debug logging
+console.log('BASE_URL:', BASE_URl);
+
+// Ensure no double slashes in URLs
+const cleanUrl = (baseUrl: string, path: string) => {
+  const cleanBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const finalUrl = `${cleanBase}${cleanPath}`;
+  console.log('cleanUrl:', { baseUrl, path, cleanBase, cleanPath, finalUrl });
+  return finalUrl;
+};
+
 const API_URLS = {
   // user related urls
-  REGISTER: `${BASE_URl}/auth/register`,
-  LOGIN: `${BASE_URl}/auth/login`,
-  VERIFY_EMAIL: (token: string) => `${BASE_URl}/auth/verify-email/${token}`,
-  FORGET_PASSWORD: `${BASE_URl}/auth/forgot-password`,
-  RESET_PASSWORD: (token: string) => `${BASE_URl}/auth/reset-password/${token}`,
-  VERIFY_AUTH: `${BASE_URl}/auth/verify-auth`,
-  LOGOUT: `${BASE_URl}/auth/logout`,
-  UPDATE_USER_PROFILE: (userId: string) =>
-    `${BASE_URl}/user/profile/update/${userId}`,
+  REGISTER: cleanUrl(BASE_URl, "/auth/register"),
+  LOGIN: cleanUrl(BASE_URl, "/auth/login"),
+  VERIFY_EMAIL: (token: string) => cleanUrl(BASE_URl, `/auth/verify-email/${token}`),
+  FORGET_PASSWORD: cleanUrl(BASE_URl, "/auth/forgot-password"),
+  RESET_PASSWORD: (token: string) => cleanUrl(BASE_URl, `/auth/reset-password/${token}`),
+  VERIFY_AUTH: cleanUrl(BASE_URl, "/auth/verify-auth"),
+  LOGOUT: cleanUrl(BASE_URl, "/auth/logout"),
+  UPDATE_USER_PROFILE: (userId: string) => cleanUrl(BASE_URl, `/user/profile/update/${userId}`),
 
   // product related urls :
-  CREATE_PRODUCT: `${BASE_URl}/product/create-product`,
-  GET_ALL_PRODUCTS: `${BASE_URl}/product/get-all-product`,
-  GET_PRODUCT_BY_ID: (id: string) =>
-    `${BASE_URl}/product/get-product-by-Id/${id}`,
-  DELETE_PRODUCT: (productId: string) =>
-    `${BASE_URl}/product/delete-product/${productId}`,
-  GET_PRODUCT_BY_SELLER_ID: (sellerId: string) =>
-    `${BASE_URl}/product/get-product-by-sellerId/${sellerId}`,
+  CREATE_PRODUCT: cleanUrl(BASE_URl, "/product/create-product"),
+  GET_ALL_PRODUCTS: cleanUrl(BASE_URl, "/product/get-all-product"),
+  GET_PRODUCT_BY_ID: (id: string) => cleanUrl(BASE_URl, `/product/get-product-by-Id/${id}`),
+  DELETE_PRODUCT: (productId: string) => cleanUrl(BASE_URl, `/product/delete-product/${productId}`),
+  GET_PRODUCT_BY_SELLER_ID: (sellerId: string) => cleanUrl(BASE_URl, `/product/get-product-by-sellerId/${sellerId}`),
 
   // Cart realted urls
-  ADD_TO_CART: `${BASE_URl}/cart/add-to-cart`,
-  GET_CART_BY_USER_ID: (userId: string) => `${BASE_URl}/cart/${userId}`,
-  REMOVE_FROM_CART: (productId: string) =>
-    `${BASE_URl}/cart/remove/${productId}`,
+  ADD_TO_CART: cleanUrl(BASE_URl, "/cart/add-to-cart"),
+  GET_CART_BY_USER_ID: (userId: string) => cleanUrl(BASE_URl, `/cart/${userId}`),
+  REMOVE_FROM_CART: (productId: string) => cleanUrl(BASE_URl, `/cart/remove/${productId}`),
 
   // wishlist related urls
-  ADD_TO_WISHLIST: `${BASE_URl}/wishlist/add-to-wishlist`,
-  GET_WISHLIST_BY_USER_ID: (userId: string) => `${BASE_URl}/wishlist/${userId}`,
-  REMOVE_FROM_WISHLIST: (productId: string) =>
-    `${BASE_URl}/wishlist/remove/${productId}`,
+  ADD_TO_WISHLIST: cleanUrl(BASE_URl, "/wishlist/add-to-wishlist"),
+  GET_WISHLIST_BY_USER_ID: (userId: string) => cleanUrl(BASE_URl, `/wishlist/${userId}`),
+  REMOVE_FROM_WISHLIST: (productId: string) => cleanUrl(BASE_URl, `/wishlist/remove/${productId}`),
 
   // order related urls
   CREATE_ORDER: (orderId?: string) =>
     orderId
-      ? `${BASE_URl}/order/create-order/${orderId}` // PATCH
-      : `${BASE_URl}/order/create-order`, 
-  GET_LOGGED_IN_USER_ORDERS: `${BASE_URl}/order/user-order`,
-  GET_ORDER_BY_ID: (id: string) => `${BASE_URl}/order/user-order/${id}`,
-  CREATE_RAZORPAY_PAYMENT: `${BASE_URl}/order/payment-razorpay`,
+      ? cleanUrl(BASE_URl, `/order/create-order/${orderId}`) // PATCH
+      : cleanUrl(BASE_URl, "/order/create-order"), 
+  GET_LOGGED_IN_USER_ORDERS: cleanUrl(BASE_URl, "/order/user-order"),
+  GET_ORDER_BY_ID: (id: string) => cleanUrl(BASE_URl, `/order/user-order/${id}`),
+  CREATE_RAZORPAY_PAYMENT: cleanUrl(BASE_URl, "/order/payment-razorpay"),
 
   // address related urls
-  CREATE_OR_UPDATE_ADDRESS: `${BASE_URl}/user/address/create-or-update-address-by-userId`,
-  GET_ADDRESS_BY_USER_ID: `${BASE_URl}/user/address/get-address-by-userId`,
+  CREATE_OR_UPDATE_ADDRESS: cleanUrl(BASE_URl, "/user/address/create-or-update-address-by-userId"),
+  GET_ADDRESS_BY_USER_ID: cleanUrl(BASE_URl, "/user/address/get-address-by-userId"),
 };
 
 export const api = createApi({

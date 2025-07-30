@@ -23,6 +23,7 @@ const app=express();
 
 const allowedOrigins = [
   "https://book-store-4do3.vercel.app",
+  "https://book-store-4do3-jx1ch8uyx-rohit9098singhs-projects.vercel.app",
   "http://localhost:3000"
 ];
 
@@ -34,10 +35,13 @@ const corsOption: CorsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
+  credentials: false, // Set to false since we're using localStorage
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 app.use(cors(corsOption));
