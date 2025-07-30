@@ -16,8 +16,8 @@ const cleanUrl = (baseUrl: string, path: string) => {
 
 const API_URLS = {
   // user related urls
-  REGISTER: cleanUrl(BASE_URl, "/auth/register"),
-  LOGIN: cleanUrl(BASE_URl, "/auth/login"),
+  REGISTER: cleanUrl(BASE_URl, "api/auth/register"),
+  LOGIN: cleanUrl(BASE_URl, "api/auth/login"),
   VERIFY_EMAIL: (token: string) => cleanUrl(BASE_URl, `/auth/verify-email/${token}`),
   FORGET_PASSWORD: cleanUrl(BASE_URl, "/auth/forgot-password"),
   RESET_PASSWORD: (token: string) => cleanUrl(BASE_URl, `/auth/reset-password/${token}`),
