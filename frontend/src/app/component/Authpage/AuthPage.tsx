@@ -63,12 +63,13 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
             const { email, password, name } = data;
             const result = await register({ email, password, name }).unwrap()
             console.log("this is the registerd result", result);
-            if (result.success) {
+            if (result.success && result.data && result.data.token) {
+                localStorage.setItem('token', result.data.token);
                 toast.success("verification link send to your email sucessfully,please verify your email");
-                dispatch(toggleLoginDialogue())
-                // router.push("/")
-
+            } else if (result.success) {
+                toast.success("verification link send to your email sucessfully,please verify your email");
             }
+            dispatch(toggleLoginDialogue())
         } catch (error) {
             toast.error("Email already registered")
             dispatch(toggleLoginDialogue())
@@ -82,14 +83,13 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
         try {
             const result = await login(data).unwrap()
             console.log("this is the login  result", result);
-            if (result.success) {
+            if (result.success && result.data && result.data.token) {
+                localStorage.setItem('token', result.data.token);
                 toast.success("user logged in successfully");
-
             }
             dispatch(toggleLoginDialogue());
             dispatch(authStatus())
             router.push("/")
-            // window.location.reload();
         } catch (error) {
             console.log(error);
             toast.error("Email or password is incorrect")
@@ -105,10 +105,14 @@ const AuthPage: React.FC<LoginProps> = ({ isLoginOpen, setIsLoginOpen }) => {
     const handleGoogleLogin = async () => {
         setGoogleLoading(true)
         try {
+            // If you handle Google login via redirect, you may need to handle token extraction elsewhere
+            // If you get a token in the response, store it in localStorage
+            // Example placeholder:
+            // const result = await googleLogin();
+            // if (result.token) localStorage.setItem('token', result.token);
             router.push(`${BASE_URl}/auth/google`);
             dispatch(authStatus());
             dispatch(toggleLoginDialogue());
-
             setTimeout(() => {
                 toast.success("Google login successfully");
                 setIsLoginOpen(false);

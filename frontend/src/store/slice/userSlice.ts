@@ -34,6 +34,9 @@ const userSlice = createSlice({
       state.user = null;
       state.isLoggedIn = false;
       state.isEmailVerified = false;
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+      }
     },
 
     // 4️ Login dialogue toggle karne ka function

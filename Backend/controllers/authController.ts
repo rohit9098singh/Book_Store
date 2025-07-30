@@ -69,17 +69,9 @@ export const verifyEmail = async (req: Request, res: Response) => {
     user.verificationToken = undefined; // so it can’t be reused
 
     const accessToken = generateToken(user);
-
-    res.cookie("access_token", accessToken, {
-      httpOnly: true,
-      sameSite:"none",
-      secure:true,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
     await user.save();
 
-    return response(res, 200, "Email verified successfully");
+    return response(res, 200, "Email verified successfully", { token: accessToken });
   } catch (error: any) {
     console.log(error);
     return response(res, 500, "Internal server error", error.message);
@@ -105,17 +97,11 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const accessToken = generateToken(user);
-    res.cookie("access_token", accessToken, {
-      httpOnly: true,
-      sameSite:"none",
-      secure:true,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
     return response(res, 200, "User logged in successfully", {
       user: user.name,
       email: user.email,
-      verificationToken:user.verificationToken
+      verificationToken: user.verificationToken,
+      token: accessToken
     });
   } catch (error: any) {
     console.log(error);

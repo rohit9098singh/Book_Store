@@ -60,7 +60,15 @@ export const api = createApi({
 
     baseUrl: BASE_URl, //Tum server ka main gate batate ho — jaise "http://localhost:8080/api"
 
-    credentials: "include", //Matlab agar server cookie ya token de toh usko bhi bhej do har request ke sath (jaise ek ID card).
+    prepareHeaders: (headers) => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`);
+        }
+      }
+      return headers;
+    },
   }),
 
   tagTypes: ["User", "Product", "Cart", "WishList", "Order", "Address"], // ek label ke jaise aage ka use ke liye

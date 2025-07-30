@@ -25,14 +25,8 @@ router.get("/google/callback",passport.authenticate("google",{failureRedirect:`$
 async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
     try {
         const user=req.user as IUser
-        const accessToken=await generateToken;
-        res.cookie("access_token", accessToken, {
-            httpOnly: true,
-            sameSite:"none",
-            secure:true,
-            maxAge: 24 * 60 * 60 * 1000,
-          });
-          res.redirect(`${process.env.FRONTEND_URL}`)
+        const accessToken=await generateToken(user);
+        res.json({ token: accessToken });
     } catch (error) {
         next(error)
     }

@@ -17,24 +17,29 @@ declare global {
     res: Response,
     next: NextFunction
   ) => {
-    const token = req.cookies["access_token"]; 
+    // Get token from Authorization header
+    let token;
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
 
     if (!token) {
       return response(res, 401, "User not authenticated, no token available");
     }
-  
+
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as jwt.JwtPayload;
-  
+
       if (!decoded || !decoded.userId) {
         return response(res, 401, "User not authorized, invalid payload");
       }
-  
+
       req.id = decoded.userId;
-      req.role=decoded.role;
+      req.role = decoded.role;
       next();
     } catch (error) {
-      return response(res, 400, "Not authorized, token no t valid or expired");
+      return response(res, 400, "Not authorized, token not valid or expired");
     }
   };
   
