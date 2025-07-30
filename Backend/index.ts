@@ -12,6 +12,7 @@ import userRoute from "./routes/userRoute"
 import orderRoute from "./routes/orderRoute"
 import adminRoute from "./routes/adminRoute"
 import passport from "./controllers/strategy/googleStrategy"
+import { CorsOptions } from "cors";
 
 dotenv.config();
 
@@ -20,10 +21,24 @@ const PORT: number = Number(process.env.PORT) || 8080;
 
 const app=express();
 
-const corsOption={
-    origin:process.env.FRONTEND_URL,
-    credentials: true,
-}
+const allowedOrigins = [
+  "https://book-store-4do3.vercel.app",
+  "http://localhost:3000"
+];
+
+const corsOption: CorsOptions = {
+  origin: function (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
 
 app.use(cors(corsOption));
 app.use(express.json());

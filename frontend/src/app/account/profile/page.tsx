@@ -122,7 +122,7 @@ const Page = () => {
                 <Button
                   type='button'
                   onClick={() => setIsEditing(true)}
-                  className='bg-pink-500 hover:bg-pink-600 text-white px-5 py-1.5 rounded mr-4 cursor-pointer'
+                  className='bg-pink-500 hover:bg-pink-600 text-white px-5 py-1.5 rounded mr-4 cursor-pointer '
                 >
                   Edit
                 </Button>
