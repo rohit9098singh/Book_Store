@@ -32,7 +32,7 @@ const Page = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="relative h-[600px] overflow-hidden ">
+      <div className="relative h-[600px] overflow-hidden    ">
         {bannerImages.map((image, index) => (
           <div
             key={index}
