@@ -167,19 +167,8 @@ export const resetPassword = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   try {
-    if (!req.cookies["access_token"]) {
-      return response(res, 400, "No active session found");
-    }
-
-    res.clearCookie("access_token", {
-        httpOnly: true,
-        sameSite:"none",
-        secure:true,
-      });
-    res.cookie("auth_token", "", {
-      httpOnly: true,
-      expires: new Date(0),
-    });
+    // Since we're using localStorage now, the frontend handles token removal
+    // No need to check or clear cookies on the backend
     return response(res, 200, "Successfully Logged out");
   } catch (error: any) {
     return response(res, 500, "Internal server error", error.message);
