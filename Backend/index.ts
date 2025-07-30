@@ -23,7 +23,6 @@ const app=express();
 
 const allowedOrigins = [
   "https://book-store-4do3.vercel.app",
-  "https://book-store-4do3-jx1ch8uyx-rohit9098singhs-projects.vercel.app",
   "http://localhost:3000"
 ];
 
