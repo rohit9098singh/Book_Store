@@ -11,7 +11,7 @@ cloudinary.config({
 });
 
 interface CustomFile extends Express.Multer.File {
-  path: string;
+  buffer: Buffer;
 }
 
 const uploadToCloudinary = (file: CustomFile): Promise<UploadApiResponse> => {
@@ -20,13 +20,23 @@ const uploadToCloudinary = (file: CustomFile): Promise<UploadApiResponse> => {
   };
 
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(file.path, options, (error, result) => {
+    // Convert buffer to base64 string for Cloudinary
+    const b64 = Buffer.from(file.buffer).toString('base64');
+    const dataURI = `data:${file.mimetype};base64,${b64}`;
+    
+    cloudinary.uploader.upload(dataURI, options, (error, result) => {
       if (error) return reject(error);
       resolve(result as UploadApiResponse);
     });
   });
 };
 
-const multerMiddleware = multer({ dest: "uploads/" }).array("images",4);
+// Use memory storage instead of disk storage for Vercel
+const multerMiddleware = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+}).array("images", 4);
 
 export { uploadToCloudinary, multerMiddleware };

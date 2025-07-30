@@ -151,7 +151,7 @@ const Page = () => {
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 ">
           {/* Book Details Card */}
           <Card className="shadow-lg border-t-4 border-t-blue-500">
             <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 mx-2 rounded-xl p-4">
