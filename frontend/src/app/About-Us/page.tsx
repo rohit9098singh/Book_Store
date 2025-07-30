@@ -23,7 +23,7 @@ const page = () => {
             <p className="text-gray-600 text-center">
               At BookKart, we aim to make reading accessible to everyone by
               providing a platform where people can buy and sell their old books
-              easily.
+              easily .
             </p>
           </div>
 
