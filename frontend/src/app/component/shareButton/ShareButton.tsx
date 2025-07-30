@@ -16,7 +16,7 @@ const ShareButton: React.FC<RWebShareProps> = ({ url, title, text }) => {
             url:url,
             title:title,
            }}
-           onClick={()=>console.log("shared successfully")}
+           onClick={()=>console.log("shared successfully ")}
          >
             <Button size={"sm"} variant={"outline" } className='cursor-pointer'>
                  <Share2 className='h-4 w-4 mr-2'/>
