@@ -31,17 +31,19 @@ const corsOption: CorsOptions = {
     origin: string | undefined,
     callback: (err: Error | null, allow?: boolean) => void
   ) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app") // ✅ allow all Vercel URLs
+    ) {
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error("Not allowed by CORS"));
+      callback(null, false); // ❗ don’t throw error, just block
     }
   },
-  credentials: false, // Set to false since we're using localStorage
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  credentials: true,
 };
+
 
 app.use(cors(corsOption));
 app.use(express.json());
